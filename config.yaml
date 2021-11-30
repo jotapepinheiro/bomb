@@ -132,8 +132,8 @@
   # Opções disponíveis: False ou True
   save_log_to_file: False  
 
-  usage_multi_account: False
+  usage_multi_account: True
   offset_secound_account: 1280
   height_secound_account: 1080
 
-  is_macos: True
+  is_macos: False
