@@ -73,12 +73,13 @@ def clickBtn(img,name=None, timeout=3, trashhold = ct['default']):
             continue
 
         x,y,w,h = matches[0]
+
         if (open_secound_account and c['usage_multi_account']):
             pyautogui.moveTo(x+c['offset_secound_account']+(w/2),y+(h/2),1)
-            logger('Move screen rigth')
+            #logger('Move screen rigth')
         else:
             pyautogui.moveTo(x+w/2,y+h/2,1)
-            logger('Move screen left')
+            #logger('Move screen left')
 
         pyautogui.doubleClick()
         return True
@@ -93,13 +94,13 @@ def printSreen():
             "left": c['offset_secound_account'], 
             "width": c['offset_secound_account'], 
             "height": c['height_secound_account']}
-            logger('Open screen rigth')
+            # logger('Open screen rigth')
         else:
             monitor = {"top": 0, 
             "left": 0, 
             "width": c['offset_secound_account'], 
             "height": c['height_secound_account']}
-            logger('Open screen left')
+            # logger('Open screen left')
 
         # Grab the data
         sct_img = np.array(sct.grab(monitor))
@@ -237,7 +238,7 @@ def login():
         if(c['is_macos']):
             pyautogui.press('command','r')
         else:
-            pyautogui.press('f5')
+            pyautogui.press('shift','f5')
         
         return
 
@@ -247,7 +248,7 @@ def login():
         #TODO mto ele da erro e poco o botao n abre
         # time.sleep(10)
 
-    if clickBtn(sign_btn_img, name='sign button', timeout=8):
+    if clickBtn(sign_btn_img, name='signButton', timeout=8):
         # sometimes the sign popup appears imediately
         login_attempts = login_attempts + 1
         # print('sign button clicked')
@@ -288,7 +289,7 @@ def refreshHeroes():
     buttonsClicked = 1
     empty_scrolls_attempts = c['scroll_attemps']
 
-    while(empty_scrolls_attempts >0):
+    while(empty_scrolls_attempts > 0):
         if c['select_heroes_mode'] == 'full':
             buttonsClicked = clickFullBarButtons()
         elif c['select_heroes_mode'] == 'green':
