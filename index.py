@@ -75,7 +75,7 @@ def clickBtn(img,name=None, timeout=3, trashhold = ct['default']):
             continue
 
         x,y,w,h = matches[0]
-        if (open_secound_account):
+        if (open_secound_account and c['usage_multi_account']):
             pyautogui.moveTo(x+c['offset_secound_account']+(w/2),y+(h/2),1)
         else:
             pyautogui.moveTo(x+w/2,y+h/2,1)
@@ -88,7 +88,7 @@ def printSreen():
 
     with mss.mss() as sct:
         # The screen part to capture
-        if (open_secound_account):
+        if (open_secound_account and c['usage_multi_account']):
             monitor = {"top": 0, 
             "left": c['offset_secound_account'], 
             "width": c['offset_secound_account'], 
@@ -232,8 +232,11 @@ def login():
     if login_attempts > 3:
         logger('Too many login attempts, refreshing.')
         login_attempts = 0
-        #pyautogui.press('f5')
-        pyautogui.press('command','r')
+        if(c['is_macos']):
+            pyautogui.press('command','r')
+        else:
+            pyautogui.press('f5')
+        
         return
 
     if clickBtn(connect_wallet_btn_img, name='connectWalletBtn', timeout = 10):
@@ -348,12 +351,13 @@ def main():
             logger('Refreshing Heroes Positions.')
             refreshHeroesPositions()
 
-        if now - last["secound_account"] > t['secound_account_positions'] * 60 :
-            open_secound_account = not open_secound_account
-            last["secound_account"] = now
-            logger('Secound Account Positions {}'.format(open_secound_account))
-            login()
-            
+        if(c['usage_multi_account']):
+            if now - last["secound_account"] > t['secound_account_positions'] * 60 :
+                open_secound_account = not open_secound_account
+                last["secound_account"] = now
+                logger('Secound Account Positions {}'.format(open_secound_account))
+                login()
+
         #clickBtn(teasureHunt)
         logger(".")
         sys.stdout.flush()
