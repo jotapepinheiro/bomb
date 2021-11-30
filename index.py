@@ -321,8 +321,7 @@ def main():
     "login" : 0,
     "heroes" : 0,
     "new_map" : 0,
-    "refresh_heroes" : 0,
-    "secound_account" : 0
+    "refresh_heroes" : 0
     }
 
     while True:
@@ -352,11 +351,9 @@ def main():
             refreshHeroesPositions()
 
         if(c['usage_multi_account']):
-            if now - last["secound_account"] > t['secound_account_positions'] * 60 :
-                open_secound_account = not open_secound_account
-                last["secound_account"] = now
-                logger('Secound Account Positions {}'.format(open_secound_account))
-                login()
+            open_secound_account = not open_secound_account
+            logger('Secound Account Positions {}'.format(open_secound_account))
+            login()
 
         #clickBtn(teasureHunt)
         logger(".")
