@@ -20,18 +20,32 @@ hero_clicks = 0
 login_attempts = 0
 open_secound_account = False
 
-go_work_img = cv2.imread('targets/go-work.png')
-commom_img = cv2.imread('targets/commom-text.png')
-arrow_img = cv2.imread('targets/go-back-arrow.png')
-hero_img = cv2.imread('targets/hero-icon.png')
-x_button_img = cv2.imread('targets/x.png')
-teasureHunt_icon_img = cv2.imread('targets/treasure-hunt-icon.png')
-ok_btn_img = cv2.imread('targets/ok.png')
-connect_wallet_btn_img = cv2.imread('targets/connect-wallet.png')
-sign_btn_img = cv2.imread('targets/select-wallet-2.png')
-new_map_btn_img = cv2.imread('targets/new-map.png')
-green_bar = cv2.imread('targets/green-bar.png')
-full_stamina = cv2.imread('targets/full-stamina.png')
+if (c['is_macos'] == True):
+    go_work_img = cv2.imread('targets/go-work-mac.png')
+    commom_img = cv2.imread('targets/commom-text-mac.png')
+    arrow_img = cv2.imread('targets/go-back-arrow-mac.png')
+    hero_img = cv2.imread('targets/hero-icon-mac.png')
+    x_button_img = cv2.imread('targets/x-mac.png')
+    teasureHunt_icon_img = cv2.imread('targets/treasure-hunt-icon-mac.png')
+    ok_btn_img = cv2.imread('targets/ok.png')
+    connect_wallet_btn_img = cv2.imread('targets/connect-wallet-mac.png')
+    sign_btn_img = cv2.imread('targets/select-wallet-2-mac.png')
+    new_map_btn_img = cv2.imread('targets/new-map.png')
+    green_bar = cv2.imread('targets/green-bar-mac.png')
+    full_stamina = cv2.imread('targets/full-stamina.png')
+else:
+    go_work_img = cv2.imread('targets/go-work.png')
+    commom_img = cv2.imread('targets/commom-text.png')
+    arrow_img = cv2.imread('targets/go-back-arrow.png')
+    hero_img = cv2.imread('targets/hero-icon.png')
+    x_button_img = cv2.imread('targets/x.png')
+    teasureHunt_icon_img = cv2.imread('targets/treasure-hunt-icon.png')
+    ok_btn_img = cv2.imread('targets/ok.png')
+    connect_wallet_btn_img = cv2.imread('targets/connect-wallet.png')
+    sign_btn_img = cv2.imread('targets/select-wallet-2.png')
+    new_map_btn_img = cv2.imread('targets/new-map.png')
+    green_bar = cv2.imread('targets/green-bar.png')
+    full_stamina = cv2.imread('targets/full-stamina.png')
 
 def logger(message):
     datetime = time.localtime()
@@ -51,7 +65,7 @@ def logger(message):
 def dot():
     sys.stdout.flush()
 
-def clickBtn(img,name=None, timeout=3, trashhold = ct['default']):
+def clickBtn(img, name=None, timeout=3, trashhold=ct['default']):
     global open_secound_account
 
     dot()
@@ -138,7 +152,7 @@ def scroll():
     if not c['use_click_and_drag_instead_of_scroll']:
         pyautogui.scroll(-c['scroll_size'])
     else:
-        pyautogui.dragRel(0,-c['click_and_drag_amount'],duration=1, button='left')
+        pyautogui.dragRel(0, -c['click_and_drag_amount'], duration=1, button='left')
 
 
 def clickButtons():
@@ -164,7 +178,7 @@ def isWorking(bar, buttons):
 
 def clickGreenBarButtons():
     # ele clicka nos q tao trabaiano mas axo q n importa
-    offset = 130
+    offset = 100
     green_bars = positions(green_bar, trashhold=ct['green_bar'])
     buttons = positions(go_work_img, trashhold=ct['go_to_work_btn'])
 
@@ -242,7 +256,7 @@ def login():
         
         return
 
-    if clickBtn(connect_wallet_btn_img, name='connectWalletBtn', timeout = 10):
+    if clickBtn(connect_wallet_btn_img, name='connectWalletBtn', timeout=10):
         login_attempts = login_attempts + 1
         logger('Connect wallet button detected, logging in!')
         #TODO mto ele da erro e poco o botao n abre
@@ -254,14 +268,14 @@ def login():
         # print('sign button clicked')
         # print('{} login attempt'.format(login_attempts))
         # time.sleep(5)
-        if clickBtn(teasureHunt_icon_img, name='teasureHunt', timeout = 15):
+        if clickBtn(teasureHunt_icon_img, name='teasureHunt', timeout=15):
             # print('sucessfully login, treasure hunt btn clicked')
             login_attempts = 0
         # time.sleep(15)
         return
         # click ok button
 
-    if clickBtn(sign_btn_img, name='signBtn', timeout = 20):
+    if clickBtn(sign_btn_img, name='signBtn', timeout=20):
         login_attempts = login_attempts + 1
         # print('sign button clicked')
         # print('{} login attempt'.format(login_attempts))

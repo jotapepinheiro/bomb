@@ -50,14 +50,14 @@
     #
     # [pt_BR]
     # Valor padrão: 0.7
-    default: 0.7
+    default: 0.6
 
     # [en_US]
     # Default value: 0.8
     #
     # [pt_BR]
     # Valor padrão: 0.8
-    commom: 0.8
+    commom: 0.6
 
     # [en_US]
     # Default value: 0.8
@@ -92,7 +92,7 @@
   #
   # [pt_BR]
   # Valor padrão: 3
-  scroll_attemps: 3
+  scroll_attemps: 2
 
   # [en_US]
   # Default value: true
@@ -123,6 +123,16 @@
   # full  = seleciona somente os heróis com a barra de stamina cheia
   select_heroes_mode: "green"
 
+  #utilizado para verificar se o envio (verificação da energia) será geral ou conforme o tipo
+  select_heroes_by_rarity: True
+
+  #configuração para envio, conforme a raridade, se a configuração acima estiver = "True"
+  select_common_heroes_mode: "green"
+  select_rare_heroes_mode: "green"
+  select_super_rare_heroes_mode: "full"
+  select_epic_heroes_mode: "full"
+  select_legendary_heroes_mode: "full"
+
   # [en_US] Option for save logs to a file (logs.txt)
   # Default value: False
   # Available options: False or True
@@ -132,7 +142,7 @@
   # Opções disponíveis: False ou True
   save_log_to_file: False  
 
-  usage_multi_account: True
+  usage_multi_account: False
   offset_secound_account: 1280
   height_secound_account: 1080
 
