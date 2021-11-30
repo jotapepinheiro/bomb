@@ -325,16 +325,16 @@ def main():
     while True:
         now = time.time()
 
-        if now - last["heroes"] > t['send_heroes_for_work'] * 60:
-            last["heroes"] = now
-            logger('Sending heroes to work.')
-            refreshHeroes()
-
         if now - last["login"] > t['check_for_login'] * 60:
             logger("Checking if game has disconnected.")
             sys.stdout.flush()
             last["login"] = now
             login()
+
+        if now - last["heroes"] > t['send_heroes_for_work'] * 60:
+            last["heroes"] = now
+            logger('Sending heroes to work.')
+            refreshHeroes()
 
         if now - last["new_map"] > t['check_for_new_map_button']:
             last["new_map"] = now
@@ -352,7 +352,8 @@ def main():
             open_secound_account = not open_secound_account
             last["secound_account"] = now
             logger('Secound Account Positions {}'.format(open_secound_account))
-
+            login()
+            
         #clickBtn(teasureHunt)
         logger(".")
         sys.stdout.flush()
