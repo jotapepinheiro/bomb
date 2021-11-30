@@ -28,8 +28,6 @@ x_button_img = cv2.imread('targets/x.png')
 teasureHunt_icon_img = cv2.imread('targets/treasure-hunt-icon.png')
 ok_btn_img = cv2.imread('targets/ok.png')
 connect_wallet_btn_img = cv2.imread('targets/connect-wallet.png')
-select_wallet_hover_img = cv2.imread('targets/select-wallet-1-hover.png')
-select_metamask_no_hover_img = cv2.imread('targets/select-wallet-1-no-hover.png')
 sign_btn_img = cv2.imread('targets/select-wallet-2.png')
 new_map_btn_img = cv2.imread('targets/new-map.png')
 green_bar = cv2.imread('targets/green-bar.png')
@@ -77,8 +75,10 @@ def clickBtn(img,name=None, timeout=3, trashhold = ct['default']):
         x,y,w,h = matches[0]
         if (open_secound_account and c['usage_multi_account']):
             pyautogui.moveTo(x+c['offset_secound_account']+(w/2),y+(h/2),1)
+            logger('Move screen rigth')
         else:
             pyautogui.moveTo(x+w/2,y+h/2,1)
+            logger('Move screen left')
 
         pyautogui.doubleClick()
         return True
@@ -93,11 +93,13 @@ def printSreen():
             "left": c['offset_secound_account'], 
             "width": c['offset_secound_account'], 
             "height": c['height_secound_account']}
+            logger('Open screen rigth')
         else:
             monitor = {"top": 0, 
             "left": 0, 
             "width": c['offset_secound_account'], 
             "height": c['height_secound_account']}
+            logger('Open screen left')
 
         # Grab the data
         sct_img = np.array(sct.grab(monitor))
@@ -257,17 +259,6 @@ def login():
         # time.sleep(15)
         return
         # click ok button
-
-    if not clickBtn(select_metamask_no_hover_img, name='selectMetamaskBtn'):
-        if clickBtn(select_wallet_hover_img, name='selectMetamaskHoverBtn', trashhold = ct['select_wallet_buttons'] ):
-            pass
-            # o ideal era que ele alternasse entre checar cada um dos 2 por um tempo 
-            # print('sleep in case there is no metamask text removed')
-            # time.sleep(20)
-    else:
-        pass
-        # print('sleep in case there is no metamask text removed')
-        # time.sleep(20)
 
     if clickBtn(sign_btn_img, name='signBtn', timeout = 20):
         login_attempts = login_attempts + 1

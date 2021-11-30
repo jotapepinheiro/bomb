@@ -132,7 +132,7 @@
   # Opções disponíveis: False ou True
   save_log_to_file: False  
 
-  usage_multi_account: True
+  usage_multi_account: False
   offset_secound_account: 1280
   height_secound_account: 1080
 
