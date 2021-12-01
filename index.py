@@ -20,32 +20,18 @@ hero_clicks = 0
 login_attempts = 0
 open_secound_account = False
 
-if (c['is_macos'] == True):
-    go_work_img = cv2.imread('targets/go-work-mac.png')
-    commom_img = cv2.imread('targets/commom-text-mac.png')
-    arrow_img = cv2.imread('targets/go-back-arrow-mac.png')
-    hero_img = cv2.imread('targets/hero-icon-mac.png')
-    x_button_img = cv2.imread('targets/x-mac.png')
-    teasureHunt_icon_img = cv2.imread('targets/treasure-hunt-icon-mac.png')
-    ok_btn_img = cv2.imread('targets/ok.png')
-    connect_wallet_btn_img = cv2.imread('targets/connect-wallet-mac.png')
-    sign_btn_img = cv2.imread('targets/select-wallet-2-mac.png')
-    new_map_btn_img = cv2.imread('targets/new-map.png')
-    green_bar = cv2.imread('targets/green-bar-mac.png')
-    full_stamina = cv2.imread('targets/full-stamina.png')
-else:
-    go_work_img = cv2.imread('targets/go-work.png')
-    commom_img = cv2.imread('targets/commom-text.png')
-    arrow_img = cv2.imread('targets/go-back-arrow.png')
-    hero_img = cv2.imread('targets/hero-icon.png')
-    x_button_img = cv2.imread('targets/x.png')
-    teasureHunt_icon_img = cv2.imread('targets/treasure-hunt-icon.png')
-    ok_btn_img = cv2.imread('targets/ok.png')
-    connect_wallet_btn_img = cv2.imread('targets/connect-wallet.png')
-    sign_btn_img = cv2.imread('targets/select-wallet-2.png')
-    new_map_btn_img = cv2.imread('targets/new-map.png')
-    green_bar = cv2.imread('targets/green-bar.png')
-    full_stamina = cv2.imread('targets/full-stamina.png')
+go_work_img = cv2.imread('targets/go-work.png')
+commom_img = cv2.imread('targets/commom-text.png')
+arrow_img = cv2.imread('targets/go-back-arrow.png')
+hero_img = cv2.imread('targets/hero-icon.png')
+x_button_img = cv2.imread('targets/x.png')
+teasureHunt_icon_img = cv2.imread('targets/treasure-hunt-icon.png')
+ok_btn_img = cv2.imread('targets/ok.png')
+connect_wallet_btn_img = cv2.imread('targets/connect-wallet.png')
+sign_btn_img = cv2.imread('targets/select-wallet-2.png')
+new_map_btn_img = cv2.imread('targets/new-map.png')
+green_bar = cv2.imread('targets/green-bar.png')
+full_stamina = cv2.imread('targets/full-stamina.png')
 
 def logger(message):
     datetime = time.localtime()
@@ -178,7 +164,7 @@ def isWorking(bar, buttons):
 
 def clickGreenBarButtons():
     # ele clicka nos q tao trabaiano mas axo q n importa
-    offset = 100
+    offset = 130
     green_bars = positions(green_bar, trashhold=ct['green_bar'])
     buttons = positions(go_work_img, trashhold=ct['go_to_work_btn'])
 
