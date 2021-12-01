@@ -4,10 +4,9 @@ import mss
 import pyautogui
 import time
 import sys
-
 import yaml
-
 import requests
+
 
 cat = """
                                                 _
@@ -25,35 +24,22 @@ cat = """
                                                   ; '   : :`-:     _.`* ;
                                                .*' /  .*' ; .*`- +'  `*'
                                                `*-*   `*-*  `*-*'
-====== Please, consider buying me an coffe :) =========================
-==== 0xbd06182D8360FB7AC1B05e871e56c76372510dDf =======================
-==== https://www.paypal.com/donate?hosted_button_id=JVYSC6ZYCNQQQ =====
+   
+ d888b  d8888b. db    db d8888b.  .d88b.     .d8b.   .o88b. db      
+88' Y8b 88  `8D 88    88 88  `8D .8P  Y8.   d8' `8b d8P  Y8 88      
+88      88oobY' 88    88 88oodD' 88    88   88ooo88 8P      88      
+88  ooo 88`8b   88    88 88~~~   88    88   88~~~88 8b      88      
+88. ~8~ 88 `88. 88b  d88 88      `8b  d8'   88   88 Y8b  d8 88booo. 
+ Y888P  88   YD ~Y8888P' 88       `Y88P'    YP   YP  `Y88P' Y88888P 
+=======================================================================
+=========================== GRUPO ACL v1 ==============================
 =======================================================================
 
->>---> Press ctrl + c to kill the bot.
->>---> Some configs can be fount in the config.yaml file.
+>>---> Pressione ctrl + c para encerrar o bot.
+>>---> Algumas configurações podem ser encontradas no arquivo config.yaml.
 """
 
 print(cat)
-
-headers = {
-    'authority': 'plausible.io',
-    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
-    'content-type': 'text/plain',
-    'accept': '*/*',
-    'sec-gpc': '1',
-    'origin': 'https://mpcabete.xyz',
-    'sec-fetch-site': 'cross-site',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-dest': 'empty',
-    'referer': 'https://mpcabete.xyz/',
-    'accept-language': 'en-US,en;q=0.9',
-}
-
-data = '{"n":"pageview","u":"https://mpcabete.xyz/bombcrypto/","d":"mpcabete.xyz","r":"https://mpcabete.xyz/","w":1182}'
-
-response = requests.post(
-    'https://plausible.io/api/event', headers=headers, data=data)
 
 if __name__ == '__main__':
 
@@ -69,6 +55,7 @@ login_attempts = 0
 last_log_is_progress = False
 
 
+go_browser_img = cv2.imread('targets/navigator.png')
 go_work_img = cv2.imread('targets/go-work.png')
 commom_img = cv2.imread('targets/commom-text.png')
 arrow_img = cv2.imread('targets/go-back-arrow.png')
@@ -203,7 +190,7 @@ def clickButtons():
         hero_clicks = hero_clicks + 1
         #cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
         if hero_clicks > 20:
-            logger('too many hero clicks, try to increase the go_to_work_btn threshold')
+            logger('too many hero clicks, tente aumentar o limite em go_to_work_btn')
             return
     return len(buttons)
 
@@ -223,9 +210,9 @@ def clickGreenBarButtons():
     # ele clicka nos q tao trabaiano mas axo q n importa
     offset = 130
     green_bars = positions(green_bar, threshold=ct['green_bar'])
-    logger('%d green bars detected' % len(green_bars))
+    logger('%d barras verdes detectadas' % len(green_bars))
     buttons = positions(go_work_img, threshold=ct['go_to_work_btn'])
-    logger('%d buttons detected' % len(buttons))
+    logger('%d botões detectadas' % len(buttons))
 
     not_working_green_bars = []
     for bar in green_bars:
@@ -386,40 +373,57 @@ def main():
     time.sleep(5)
     t = c['time_intervals']
 
-    last = {
-        "login": 0,
-        "heroes": 0,
-        "new_map": 0,
-        "refresh_heroes": 0
-    }
+    browser = 0
+    last = [
+        {
+            "login": 0,
+            "heroes": 0,
+            "new_map": 0,
+            "refresh_heroes": 0,
+        },
+        {
+            "login": 0,
+            "heroes": 0,
+            "new_map": 0,
+            "refresh_heroes": 0,
+        }
+    ]
 
     while True:
         now = time.time()
 
-        if now - last["heroes"] > t['send_heroes_for_work'] * 60:
-            last["heroes"] = now
+        if now - last[browser]["heroes"] > t['send_heroes_for_work'] * 60:
+            last[browser]["heroes"] = now
             logger('Sending heroes to work.')
             refreshHeroes()
 
-        if now - last["login"] > t['check_for_login'] * 60:
+        if now - last[browser]["login"] > t['check_for_login'] * 60:
             logger("Checking if game has disconnected.")
             sys.stdout.flush()
-            last["login"] = now
+            last[browser]["login"] = now
             login()
 
-        if now - last["new_map"] > t['check_for_new_map_button']:
-            last["new_map"] = now
+        if now - last[browser]["new_map"] > t['check_for_new_map_button']:
+            last[browser]["new_map"] = now
             if clickBtn(new_map_btn_img):
                 with open('new-map.log', 'a') as new_map_log:
                     new_map_log.write(str(time.time())+'\n')
                 logger('New Map button clicked!')
 
-        if now - last["refresh_heroes"] > t['refresh_heroes_positions'] * 60:
-            last["refresh_heroes"] = now
+        if now - last[browser]["refresh_heroes"] > t['refresh_heroes_positions'] * 60:
+            last[browser]["refresh_heroes"] = now
             logger('Refreshing Heroes Positions.')
             refreshHeroesPositions()
 
-        # clickBtn(teasureHunt)
+        browser_list = positions(go_browser_img, threshold=ct['default'])
+        if len(browser_list) > 1:
+            logger('Trocando de browser')
+            browser = 1 if browser == 0 else 0
+            x, y, w, h = browser_list[browser]
+            pyautogui.moveTo(x+w/2, y+h/2, 1)
+            pyautogui.click()
+            time.sleep(1)
+
         logger(None, progress_indicator=True)
 
         sys.stdout.flush()
