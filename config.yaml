@@ -10,35 +10,45 @@
     #
     # [pt_BR] Intervalo de tempo para verificar se há heróis disponíveis para trabalhar
     # Valor padrão (em minutos): 10
-    send_heroes_for_work: 10
+    send_heroes_for_work:
+      init: 10
+      end: 20
     
     # [en_US] Time interval to update heroes position in the map,
     # Default value (in minutes): 3
     #
     # [pt_BR] Intervalo de tempo para atualizar a posição dos heróis no mapa
     # Valor padrão (em minutos): 3
-    refresh_heroes_positions: 3
+    refresh_heroes_positions:
+      init: 1
+      end: 5
     
     # [en_US] Time interval to check for new maps
     # Default value (in minutes): 3 
     #
     # [pt_BR] Intervalo de tempo para verificar por novos mapas
     # Valor padrão (em minutos): 3
-    check_for_new_map_button: 3
+    check_for_new_map_button:
+      init: 1
+      end: 5
     
     # [en_US] Time interval to check for login request
     # Default value (in minutes): 3
     #
     # [pt_BR] Intervalo de tempo para verificar se existe solicitação de login
     # Valor padrão (em minutos): 5
-    check_for_login: 5
+    check_for_login:
+      init: 3
+      end: 8
 
     # [en_US] Time interval between moviments
     # Default value (in seconds): 1 
     #
     # [pt_BR] Intervalo de tempo entre movimentos
     # Valor padrão (em segundos): 1
-    interval_between_moviments: 1
+    interval_between_moviments:
+      init: 1
+      end: 5
 
   # [en_US] How confident the bot needs to be to click the buttons (values from 0 to 1. 0 is the minimum value, 1 is the maximum value)
   #
@@ -142,8 +152,8 @@
   # Opções disponíveis: False ou True
   save_log_to_file: False  
 
-  usage_multi_account: False
-  offset_secound_account: 1280
-  height_secound_account: 1080
+  usage_multi_account: True
+  screen_width: 1280
+  screen_height: 1080
 
   is_macos: True

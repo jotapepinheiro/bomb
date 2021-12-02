@@ -11,14 +11,21 @@ if __name__ == '__main__':
 
     stream = open("config.yaml", 'r')
     c = yaml.safe_load(stream)
+t = c['time_intervals']
 ct = c['trashhold']
 
-pyautogui.PAUSE = c['time_intervals']['interval_between_moviments']
+shw = t['send_heroes_for_work']
+rhp = t['refresh_heroes_positions']
+cnm = t['check_for_new_map_button']
+cfl = t['check_for_login']
+ibm = t['interval_between_moviments']
+
+pyautogui.PAUSE = np.random.randint(ibm['init'],ibm['end'])
 
 pyautogui.FAILSAFE = True
 hero_clicks = 0
 login_attempts = 0
-open_secound_account = False
+open_secound_account = True
 
 go_work_img = cv2.imread('targets/go-work.png')
 commom_img = cv2.imread('targets/commom-text.png')
@@ -75,7 +82,7 @@ def clickBtn(img, name=None, timeout=3, trashhold=ct['default']):
         x,y,w,h = matches[0]
 
         if (open_secound_account and c['usage_multi_account']):
-            pyautogui.moveTo(x+c['offset_secound_account']+(w/2),y+(h/2),1)
+            pyautogui.moveTo(x+c['screen_width']+(w/2),y+(h/2),1)
             #logger('Move screen rigth')
         else:
             pyautogui.moveTo(x+w/2,y+h/2,1)
@@ -91,15 +98,15 @@ def printSreen():
         # The screen part to capture
         if (open_secound_account and c['usage_multi_account']):
             monitor = {"top": 0, 
-            "left": c['offset_secound_account'], 
-            "width": c['offset_secound_account'], 
-            "height": c['height_secound_account']}
+            "left": c['screen_width'], 
+            "width": c['screen_width'], 
+            "height": c['screen_height']}
             # logger('Open screen rigth')
         else:
             monitor = {"top": 0, 
             "left": 0, 
-            "width": c['offset_secound_account'], 
-            "height": c['height_secound_account']}
+            "width": c['screen_width'], 
+            "height": c['screen_height']}
             # logger('Open screen left')
 
         # Grab the data
@@ -304,6 +311,19 @@ def refreshHeroes():
     logger('{} heroes sent to work so far'.format(hero_clicks))
     goToGame()
 
+def randomMouseMovement():
+    effects = [
+        pyautogui.easeInQuad, 
+        pyautogui.easeOutQuad, 
+        pyautogui.easeInOutQuad,
+        pyautogui.easeInBounce,
+        pyautogui.easeInElastic
+        ]
+    x = np.random.randint(0, c['screen_width'])
+    y = np.random.randint(0, c['screen_height'])
+    e = np.random.choice(effects)
+    pyautogui.moveTo(x, y, np.random.randint(1,2), e)
+    
 def main():
     time.sleep(5)
     t = c['time_intervals']
@@ -319,40 +339,43 @@ def main():
     while True:
         now = time.time()
 
-        if now - last["login"] > t['check_for_login'] * 60:
+        randomMouseMovement()
+
+        if now - last["login"] > np.random.randint(cfl['init'],cfl['end']) * 60:
             logger("Checking if game has disconnected.")
             sys.stdout.flush()
             last["login"] = now
+            if c['usage_multi_account']:
+                open_secound_account = not open_secound_account
+                logger('Secound Account Positions {}'.format(open_secound_account))
             login()
+            randomMouseMovement()
 
-        if now - last["heroes"] > t['send_heroes_for_work'] * 60:
+        if now - last["heroes"] > np.random.randint(shw['init'],shw['end']) * 60:
             last["heroes"] = now
             logger('Sending heroes to work.')
             refreshHeroes()
+            randomMouseMovement()
 
-        if now - last["new_map"] > t['check_for_new_map_button']:
+        if now - last["new_map"] > np.random.randint(cnm['init'],cnm['end']):
             last["new_map"] = now
             if clickBtn(new_map_btn_img):
                 with open('new-map.log','a') as new_map_log:
                     new_map_log.write(str(time.time())+'\n')
                 logger('New Map button clicked!')
+                randomMouseMovement()
 
-        if now - last["refresh_heroes"] > t['refresh_heroes_positions'] * 60 :
+        if now - last["refresh_heroes"] > np.random.randint(rhp['init'],rhp['end']) * 60 :
             last["refresh_heroes"] = now
             logger('Refreshing Heroes Positions.')
             refreshHeroesPositions()
 
-        if(c['usage_multi_account']):
-            open_secound_account = not open_secound_account
-            logger('Secound Account Positions {}'.format(open_secound_account))
-            login()
-
+        randomMouseMovement()
         #clickBtn(teasureHunt)
         logger(".")
         sys.stdout.flush()
 
-        time.sleep(1)
-
+        time.sleep(np.random.randint(1,5))
 
 main()
 
