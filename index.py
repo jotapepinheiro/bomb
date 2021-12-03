@@ -26,6 +26,7 @@ pyautogui.FAILSAFE = True
 hero_clicks = 0
 login_attempts = 0
 open_secound_account = True
+last_log_is_progress = False
 
 go_work_img = cv2.imread('targets/go-work.png')
 commom_img = cv2.imread('targets/commom-text.png')
@@ -39,8 +40,182 @@ sign_btn_img = cv2.imread('targets/select-wallet-2.png')
 new_map_btn_img = cv2.imread('targets/new-map.png')
 green_bar = cv2.imread('targets/green-bar.png')
 full_stamina = cv2.imread('targets/full-stamina.png')
+puzzle_img = cv2.imread('targets/puzzle.png')
+piece = cv2.imread('targets/piece.png')
+robot = cv2.imread('targets/robot.png')
+slider = cv2.imread('targets/slider.png')
 
-def logger(message):
+###################### puzzle #############
+def findPuzzlePieces(result, piece_img, threshold=0.5):
+    piece_w = piece_img.shape[1]
+    piece_h = piece_img.shape[0]
+    yloc, xloc = np.where(result >= threshold)
+
+    r= []
+    for (piece_x, piece_y) in zip(xloc, yloc):
+        r.append([int(piece_x), int(piece_y), int(piece_w), int(piece_h)])
+        r.append([int(piece_x), int(piece_y), int(piece_w), int(piece_h)])
+
+    r, weights = cv2.groupRectangles(r, 1, 0.2)
+
+    if len(r) < 2:
+        print('threshold = %.3f' % threshold)
+        return findPuzzlePieces(result, piece_img,threshold-0.01)
+
+    if len(r) == 2:
+        print('match')
+        return r
+
+    if len(r) > 2:
+        print('overshoot by %d' % len(r))
+        return r
+
+def getRightPiece(puzzle_pieces):
+    xs = [row[0] for row in puzzle_pieces]
+    index_of_right_rectangle = xs.index(max(xs))
+
+    right_piece = puzzle_pieces[index_of_right_rectangle]
+    return right_piece
+
+def getLeftPiece(puzzle_pieces):
+    xs = [row[0] for row in puzzle_pieces]
+    index_of_left_rectangle = xs.index(min(xs))
+
+    left_piece = puzzle_pieces[index_of_left_rectangle]
+    return left_piece
+
+def show(rectangles, img = None):
+    if img is None:
+        with mss.mss() as sct:
+            monitor = {"top": 0, 
+            "left": 0, 
+            "width": c['screen_width'], 
+            "height": c['screen_height']}
+
+        img = np.array(sct.grab(monitor))
+
+    for (x, y, w, h) in rectangles:
+        cv2.rectangle(img, (x, y), (x + w, y + h), (255,255,255,255), 2)
+
+    # cv2.rectangle(img, (result[0], result[1]), (result[0] + result[2], result[1] + result[3]), (255,50,255), 2)
+    cv2.imshow('img', img)
+    cv2.waitKey(0)
+
+def getPiecesPosition(t=150):
+    popup_pos = positions(robot)
+    if len(popup_pos) == 0:
+        print('puzzle not found')
+        return
+    rx, ry, _, _ = popup_pos[0]
+
+    w = 380
+    h = 200
+    x_offset = -40
+    y_offset = 65
+
+    y = ry + y_offset
+    x = rx + x_offset
+
+    img = printSreen()
+
+    cropped = img[ y : y + h , x: x + w]
+    blurred = cv2.GaussianBlur(cropped, (3, 3), 0)
+    edges = cv2.Canny(blurred, threshold1=t/2, threshold2=t,L2gradient=True)
+    # img = cv2.Laplacian(img,cv2.CV_64F)
+
+    # gray_piece_img = cv2.cvtColor(piece, cv2.COLOR_BGR2GRAY)
+    piece_img = cv2.cvtColor(piece, cv2.COLOR_BGR2GRAY)
+    print('----')
+    print(piece_img.shape)
+    print(edges.shape)
+    print('----')
+    # piece_img = cv2.Canny(gray_piece_img, threshold1=t/2, threshold2=t,L2gradient=True)
+    # result = cv2.matchTemplate(edges,piece_img,cv2.TM_CCOEFF_NORMED)
+    result = cv2.matchTemplate(edges,piece_img,cv2.TM_CCORR_NORMED)
+
+    puzzle_pieces = findPuzzlePieces(result, piece_img)
+
+    if puzzle_pieces is None:
+        return
+
+    # show(puzzle_pieces, edges)
+    # exit()
+
+    absolute_puzzle_pieces = []
+    for i, puzzle_piece in enumerate(puzzle_pieces):
+        px, py, pw, ph = puzzle_piece
+        absolute_puzzle_pieces.append( [ x + px, y + py, pw, ph])
+
+    absolute_puzzle_pieces = np.array(absolute_puzzle_pieces)
+    # show(absolute_puzzle_pieces)
+    return absolute_puzzle_pieces
+
+def getSliderPosition():
+    slider_pos = positions(slider)
+    if len (slider_pos) == 0:
+        return False
+    x, y, w, h = slider_pos[0]
+    position = [x+w/2,y+h/2]
+    return position
+
+def solveCapcha():
+    logger('checking for capcha')
+    pieces_start_pos = getPiecesPosition()
+    if pieces_start_pos is None :
+        return
+    slider_start_pos = getSliderPosition()
+
+    x,y = slider_start_pos
+    pyautogui.moveTo(x,y,1)
+    pyautogui.mouseDown()
+    pyautogui.moveTo(x+300 ,y,0.5)
+    pieces_end_pos = getPiecesPosition()
+
+    piece_start, _, _, _ = getLeftPiece(pieces_start_pos)
+    piece_end, _, _, _ = getRightPiece(pieces_end_pos)
+    piece_middle, _, _, _  = getRightPiece(pieces_start_pos)
+    slider_start, _, = slider_start_pos
+    slider_end, _ = getSliderPosition()
+    print (piece_start)
+    print (piece_end)
+    print (piece_middle)
+    print (slider_start)
+    print (slider_end)
+
+    piece_domain = piece_end - piece_start
+    middle_piece_in_percent = (piece_middle - piece_start)/piece_domain
+    print('middle_piece_in_percent{} '.format(middle_piece_in_percent ))
+
+    slider_domain = slider_end - slider_start
+    slider_awnser = slider_start + (middle_piece_in_percent * slider_domain)
+    # arr = np.array([[int(piece_start),int(y-20),int(10),int(10)],[int(piece_middle),int(y-20),int(10),int(10)],[int(piece_end-20),int(y),int(10),int(10)],[int(slider_awnser),int(y),int(20),int(20)]])
+
+    pyautogui.moveTo(slider_awnser,y,0.5)
+    pyautogui.mouseUp()
+
+    # show(arr)
+    #########################################
+
+def logger(message, progress_indicator = False):
+    global last_log_is_progress
+
+    # Start progress indicator and append dots to in subsequent progress calls
+    if progress_indicator:
+        if not last_log_is_progress:
+            last_log_is_progress = True
+            sys.stdout.write('\n => .')
+            sys.stdout.flush()
+        else:
+            sys.stdout.write('.')
+            sys.stdout.flush()
+
+        return
+
+    if last_log_is_progress:
+        sys.stdout.write('\n\n')
+        sys.stdout.flush()
+        last_log_is_progress = False
+
     datetime = time.localtime()
     formatted_datetime = time.strftime("%d/%m/%Y %H:%M:%S", datetime)
 
@@ -52,16 +227,13 @@ def logger(message):
         logger_file = open("logger.log", "a")
         logger_file.write(formatted_message)
         logger_file.close()
-    
-    return True
 
-def dot():
-    sys.stdout.flush()
+    return True
 
 def clickBtn(img, name=None, timeout=3, trashhold=ct['default']):
     global open_secound_account
 
-    dot()
+    logger(None, progress_indicator=True)
     if not name is None:
         pass
         # print('waiting for "{}" button, timeout of {}s'.format(name, timeout))
@@ -122,7 +294,6 @@ def positions(target, trashhold=ct['default']):
 
     yloc, xloc = np.where(result >= trashhold)
 
-
     rectangles = []
     for (x, y) in zip(xloc, yloc):
         rectangles.append([int(x), int(y), int(w), int(h)])
@@ -133,7 +304,7 @@ def positions(target, trashhold=ct['default']):
 
 def scroll():
 
-    commoms = positions(commom_img, trashhold = ct['commom'])
+    commoms = positions(commom_img, trashhold=ct['commom'])
     if (len(commoms) == 0):
         # print('no commom text found')
         return
@@ -147,7 +318,6 @@ def scroll():
     else:
         pyautogui.dragRel(0, -c['click_and_drag_amount'], duration=1, button='left')
 
-
 def clickButtons():
     buttons = positions(go_work_img, trashhold=ct['go_to_work_btn'])
     # print('buttons: {}'.format(len(buttons)))
@@ -157,6 +327,9 @@ def clickButtons():
         global hero_clicks
         hero_clicks = hero_clicks + 1
         #cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
+        if hero_clicks > 20:
+            logger('too many hero clicks, try to increase the go_to_work_btn threshold')
+            return
     return len(buttons)
 
 def isWorking(bar, buttons):
@@ -173,13 +346,16 @@ def clickGreenBarButtons():
     # ele clicka nos q tao trabaiano mas axo q n importa
     offset = 130
     green_bars = positions(green_bar, trashhold=ct['green_bar'])
+    logger('%d green bars detected' % len(green_bars))
     buttons = positions(go_work_img, trashhold=ct['go_to_work_btn'])
+    logger('%d buttons detected' % len(buttons))
 
     not_working_green_bars = []
     for bar in green_bars:
         if not isWorking(bar, buttons):
             not_working_green_bars.append(bar)
     if len(not_working_green_bars) > 0:
+        logger('%d buttons with green bar detected' % len(not_working_green_bars))
         logger('Clicking in %d heroes.' % len(not_working_green_bars))
 
     # se tiver botao com y maior que bar y-10 e menor que y+10
@@ -189,6 +365,9 @@ def clickGreenBarButtons():
         pyautogui.click()
         global hero_clicks
         hero_clicks = hero_clicks + 1
+        if hero_clicks > 20:
+            logger('too many hero clicks, try to increase the go_to_work_btn threshold')
+            return
         #cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
     return len(not_working_green_bars)
 
@@ -218,6 +397,7 @@ def goToHeroes():
         global login_attempts
         login_attempts = 0
 
+    solveCapcha()
     # time.sleep(5)
     clickBtn(hero_img)
     # time.sleep(5)
@@ -244,12 +424,15 @@ def login():
         login_attempts = 0
         if(c['is_macos']):
             pyautogui.press('command','r')
+            return
         else:
-            pyautogui.press('shift','f5')
-        
-        return
+            pyautogui.press('ctrl','f5')
+            return
 
+    solveCapcha()
+    
     if clickBtn(connect_wallet_btn_img, name='connectWalletBtn', timeout=10):
+        solveCapcha()
         login_attempts = login_attempts + 1
         logger('Connect wallet button detected, logging in!')
         #TODO mto ele da erro e poco o botao n abre
@@ -323,7 +506,7 @@ def randomMouseMovement():
     y = np.random.randint(0, c['screen_height'])
     e = np.random.choice(effects)
     pyautogui.moveTo(x, y, np.random.randint(1,2), e)
-    
+
 def main():
     time.sleep(5)
     t = c['time_intervals']
@@ -352,12 +535,14 @@ def main():
             randomMouseMovement()
 
         if now - last["heroes"] > np.random.randint(shw['init'],shw['end']) * 60:
+            solveCapcha()
             last["heroes"] = now
             logger('Sending heroes to work.')
             refreshHeroes()
             randomMouseMovement()
 
         if now - last["new_map"] > np.random.randint(cnm['init'],cnm['end']):
+            solveCapcha()
             last["new_map"] = now
             if clickBtn(new_map_btn_img):
                 with open('new-map.log','a') as new_map_log:
@@ -366,13 +551,15 @@ def main():
                 randomMouseMovement()
 
         if now - last["refresh_heroes"] > np.random.randint(rhp['init'],rhp['end']) * 60 :
+            solveCapcha()
             last["refresh_heroes"] = now
             logger('Refreshing Heroes Positions.')
             refreshHeroesPositions()
 
         randomMouseMovement()
         #clickBtn(teasureHunt)
-        logger(".")
+        logger(None, progress_indicator=True)
+
         sys.stdout.flush()
 
         time.sleep(np.random.randint(1,5))
