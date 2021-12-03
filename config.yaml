@@ -12,7 +12,7 @@
     # Valor padrão (em minutos): 10
     send_heroes_for_work:
       init: 10
-      end: 20
+      end: 15
     
     # [en_US] Time interval to update heroes position in the map,
     # Default value (in minutes): 3
@@ -60,14 +60,14 @@
     #
     # [pt_BR]
     # Valor padrão: 0.7
-    default: 0.6
+    default: 0.7
 
     # [en_US]
     # Default value: 0.8
     #
     # [pt_BR]
     # Valor padrão: 0.8
-    commom: 0.6
+    commom: 0.8
 
     # [en_US]
     # Default value: 0.8

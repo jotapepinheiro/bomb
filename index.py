@@ -87,10 +87,16 @@ def getLeftPiece(puzzle_pieces):
 def show(rectangles, img = None):
     if img is None:
         with mss.mss() as sct:
-            monitor = {"top": 0, 
-            "left": 0, 
-            "width": c['screen_width'], 
-            "height": c['screen_height']}
+            if (open_secound_account and c['usage_multi_account']):
+                monitor = {"top": 0, 
+                "left": c['screen_width'], 
+                "width": c['screen_width'], 
+                "height": c['screen_height']}
+            else:
+                monitor = {"top": 0, 
+                "left": 0, 
+                "width": c['screen_width'], 
+                "height": c['screen_height']}
 
         img = np.array(sct.grab(monitor))
 
@@ -125,10 +131,10 @@ def getPiecesPosition(t=150):
 
     # gray_piece_img = cv2.cvtColor(piece, cv2.COLOR_BGR2GRAY)
     piece_img = cv2.cvtColor(piece, cv2.COLOR_BGR2GRAY)
-    print('----')
-    print(piece_img.shape)
-    print(edges.shape)
-    print('----')
+    # print('----')
+    # print(piece_img.shape)
+    # print(edges.shape)
+    # print('----')
     # piece_img = cv2.Canny(gray_piece_img, threshold1=t/2, threshold2=t,L2gradient=True)
     # result = cv2.matchTemplate(edges,piece_img,cv2.TM_CCOEFF_NORMED)
     result = cv2.matchTemplate(edges,piece_img,cv2.TM_CCORR_NORMED)
@@ -155,10 +161,12 @@ def getSliderPosition():
     if len (slider_pos) == 0:
         return False
     x, y, w, h = slider_pos[0]
-    position = [x+w/2,y+h/2]
+    position = [x+(w/2),y+(h/2)]
     return position
 
 def solveCapcha():
+    global open_secound_account
+
     logger('checking for capcha')
     pieces_start_pos = getPiecesPosition()
     if pieces_start_pos is None :
@@ -168,7 +176,11 @@ def solveCapcha():
     x,y = slider_start_pos
     pyautogui.moveTo(x,y,1)
     pyautogui.mouseDown()
-    pyautogui.moveTo(x+300 ,y,0.5)
+    if (open_secound_account and c['usage_multi_account']):
+        pyautogui.moveTo(x+c['screen_width']+300,y,0.5)
+    else:
+        pyautogui.moveTo(x+300,y,0.5)
+
     pieces_end_pos = getPiecesPosition()
 
     piece_start, _, _, _ = getLeftPiece(pieces_start_pos)
@@ -176,11 +188,11 @@ def solveCapcha():
     piece_middle, _, _, _  = getRightPiece(pieces_start_pos)
     slider_start, _, = slider_start_pos
     slider_end, _ = getSliderPosition()
-    print (piece_start)
-    print (piece_end)
-    print (piece_middle)
-    print (slider_start)
-    print (slider_end)
+    # print (piece_start)
+    # print (piece_end)
+    # print (piece_middle)
+    # print (slider_start)
+    # print (slider_end)
 
     piece_domain = piece_end - piece_start
     middle_piece_in_percent = (piece_middle - piece_start)/piece_domain
@@ -190,7 +202,11 @@ def solveCapcha():
     slider_awnser = slider_start + (middle_piece_in_percent * slider_domain)
     # arr = np.array([[int(piece_start),int(y-20),int(10),int(10)],[int(piece_middle),int(y-20),int(10),int(10)],[int(piece_end-20),int(y),int(10),int(10)],[int(slider_awnser),int(y),int(20),int(20)]])
 
-    pyautogui.moveTo(slider_awnser,y,0.5)
+    if (open_secound_account and c['usage_multi_account']):
+        pyautogui.moveTo(slider_awnser+c['screen_width'],y,0.5)
+    else:
+        pyautogui.moveTo(slider_awnser,y,0.5)
+
     pyautogui.mouseUp()
 
     # show(arr)
@@ -257,7 +273,7 @@ def clickBtn(img, name=None, timeout=3, trashhold=ct['default']):
             pyautogui.moveTo(x+c['screen_width']+(w/2),y+(h/2),1)
             #logger('Move screen rigth')
         else:
-            pyautogui.moveTo(x+w/2,y+h/2,1)
+            pyautogui.moveTo(x+(w/2),y+(h/2),1)
             #logger('Move screen left')
 
         pyautogui.doubleClick()
