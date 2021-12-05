@@ -64,6 +64,7 @@ chest1 = cv2.imread('targets/chest1.png')
 chest2 = cv2.imread('targets/chest2.png')
 chest3 = cv2.imread('targets/chest3.png')
 chest4 = cv2.imread('targets/chest4.png')
+jaula = cv2.imread('targets/jaula.png')
 
 ###################### puzzle #############
 def findPuzzlePieces(result, piece_img, threshold=0.5):
@@ -290,6 +291,8 @@ def sendMapReport():
     if(len(d_telegram["telegram_chat_id"]) <= 0 or d_telegram["enable_map_report"] is False):
         return
 
+    time.sleep(3)
+
     back = positions(arrow_img)
     
     if len(back) <= 0:
@@ -332,6 +335,7 @@ def sendPossibleAmountReport(baseImage):
     c2 = len(positions(chest2, 0.5, baseImage))
     c3 = len(positions(chest3, 0.5, baseImage))
     c4 = len(positions(chest4, 0.5, baseImage))
+    c5 = len(positions(jaula, 0.5, baseImage))
     
     value1 = c1 * d_game["value_chest1"]
     value2 = c2 * d_game["value_chest2"]
@@ -346,7 +350,8 @@ Possible quantity chest per type:
 🟣  ==> """+str(c2)+"""
 🟡  ==> """+str(c3)+"""
 🔵  ==> """+str(c4)+"""
-Possible amount : """+f'{total:.3f} bcoin'+"""
+🤪  ==> Jaula """+str(c5)+"""
+Possible amount : 💣 """+f'{total:.3f} bcoin'+"""
 """
     logger(report, False, True)
 
@@ -593,8 +598,6 @@ def login():
             randomMouseMovement(False, c['screen_width']+(c['screen_width']/2), c['screen_height']/2)
         else:
             randomMouseMovement(False, c['screen_width']/2, c['screen_height']/2)
-
-        pyautogui.click()
 
         if(c['is_macos']):
             pyautogui.hotkey('command','r')

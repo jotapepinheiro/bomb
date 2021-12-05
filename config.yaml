@@ -47,10 +47,10 @@ threshold:
 game:
   game_width: 941
   game_height: 468
-  value_chest1: 0.0145
-  value_chest2: 0.0325
-  value_chest3: 0.1625
-  value_chest4: 0.3250
+  value_chest1: 0.05
+  value_chest2: 0.2
+  value_chest3: 0.4
+  value_chest4: 1
 
 # curl https://api.telegram.org/bot5012946802:AAF39oQO7QB0oOWfdU_9uBzabz49gwqNn1I/getUpdates
 telegram:
