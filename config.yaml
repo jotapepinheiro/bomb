@@ -37,7 +37,7 @@ time_intervals:
     end: 5
 
 # O quão confiante o bot precisa estar para clicar nos botões (valores entre 0 e 1. 0 é o valor mínimo, 1 é o valor máximo)
-trashhold:
+threshold:
   default: 0.7
   commom: 0.8
   select_wallet_buttons: 0.8
@@ -45,13 +45,19 @@ trashhold:
   green_bar: 0.9
 
 game:
-  mouse_speed: 0.03
+  game_width: 941
+  game_height: 468
+  value_chest1: 0.0145
+  value_chest2: 0.0325
+  value_chest3: 0.1625
+  value_chest4: 0.3250
 
 # curl https://api.telegram.org/bot5012946802:AAF39oQO7QB0oOWfdU_9uBzabz49gwqNn1I/getUpdates
 telegram:
   telegram_chat_id: ["168801094"]
   telegram_bot_key: "5012946802:AAF39oQO7QB0oOWfdU_9uBzabz49gwqNn1I"
   enable_coin_report: True
+  enable_map_report: True
 
 # Valor padrão: 60
 scroll_size: 60

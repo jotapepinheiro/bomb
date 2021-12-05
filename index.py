@@ -13,7 +13,7 @@ if __name__ == '__main__':
     c = yaml.safe_load(stream)
 
 t = c['time_intervals']
-ct = c['trashhold']
+ct = c['threshold']
 d_game = c['game']
 d_telegram = c['telegram']
 
@@ -189,22 +189,21 @@ def solveCapcha():
     pieces_start_pos = getPiecesPosition()
     if pieces_start_pos is None :
         return "not-found"
+
     slider_start_pos = getSliderPosition()
     if slider_start_pos is None:
-        print('slider_start_pos')
         return "fail"
 
     x,y = slider_start_pos
-    pyautogui.moveTo(x,y,1)
+    randomMouseMovement(False, x, y)
     pyautogui.mouseDown()
     if (open_secound_account and c['usage_multi_account']):
-        pyautogui.moveTo(x+c['screen_width']+300,y,0.5)
+        randomMouseMovement(False, x+c['screen_width']+300, y)
     else:
-        pyautogui.moveTo(x+300,y,0.5)
+        randomMouseMovement(False, x+300, y)
 
     pieces_end_pos = getPiecesPosition()
     if pieces_end_pos is None:
-        print('pieces_end_pos')
         return "fail"
 
     piece_start, _, _, _ = getLeftPiece(pieces_start_pos)
@@ -213,7 +212,6 @@ def solveCapcha():
     slider_start, _, = slider_start_pos
     slider_end_pos = getSliderPosition()
     if slider_end_pos is None:
-        print ('slider_end_pos')
         return "fail"
 
     slider_end, _ = slider_end_pos
@@ -226,9 +224,9 @@ def solveCapcha():
     # arr = np.array([[int(piece_start),int(y-20),int(10),int(10)],[int(piece_middle),int(y-20),int(10),int(10)],[int(piece_end-20),int(y),int(10),int(10)],[int(slider_awnser),int(y),int(20),int(20)]])
 
     if (open_secound_account and c['usage_multi_account']):
-        pyautogui.moveTo(slider_awnser+c['screen_width'],y,0.5)
+        randomMouseMovement(False, slider_awnser+c['screen_width'], y)
     else:
-        pyautogui.moveTo(slider_awnser,y,0.5)
+        randomMouseMovement(False, slider_awnser, y)
 
     pyautogui.mouseUp()
 
@@ -287,6 +285,71 @@ def logger(message, progress_indicator = False, telegram = False):
 
     return True
 
+   # Sent MAP report to telegram
+def sendMapReport():
+    if(len(d_telegram["telegram_chat_id"]) <= 0 or d_telegram["enable_map_report"] is False):
+        return
+
+    back = positions(arrow_img)
+    
+    if len(back) <= 0:
+        return
+
+    rx, ry, _, _ = back[0]
+
+    sct_img = printSreen()
+
+    w = 962
+    h = 603
+    x_offset = 0
+    y_offset = 0
+
+    y = ry - y_offset
+    x = rx + x_offset
+
+    crop_img = sct_img[ y : y + h , x: x + w]
+    #resized = cv2.resize(crop_img, (500, 250))
+
+    cv2.imwrite('map-report.png', crop_img)
+    time.sleep(1)
+    try:
+        for chat_id in d_telegram["telegram_chat_id"]:
+            bot.send_document(chat_id=chat_id, document=open('map-report.png', 'rb'))
+    except:
+        logger("Telegram offline...")
+
+    try:
+        sendPossibleAmountReport(sct_img)
+    except:
+        logger("Error finding chests.")
+
+    clickBtn(x_button_img)
+    logger("📝 Map Report sent. ", False, True)
+
+# Count all chests in the map and calculate a value in BCoins.
+def sendPossibleAmountReport(baseImage):
+    c1 = len(positions(chest1, 0.5, baseImage))
+    c2 = len(positions(chest2, 0.5, baseImage))
+    c3 = len(positions(chest3, 0.5, baseImage))
+    c4 = len(positions(chest4, 0.5, baseImage))
+    
+    value1 = c1 * d_game["value_chest1"]
+    value2 = c2 * d_game["value_chest2"]
+    value3 = c3 * d_game["value_chest3"]
+    value4 = c4 * d_game["value_chest4"]
+
+    total = value1 + value2 + value3 + value4
+
+    report = """
+Possible quantity chest per type:
+🟤  ==> """+str(c1)+"""
+🟣  ==> """+str(c2)+"""
+🟡  ==> """+str(c3)+"""
+🔵  ==> """+str(c4)+"""
+Possible amount : """+f'{total:.3f} bcoin'+"""
+"""
+    logger(report, False, True)
+
 # Sent BCOIN report to telegram
 def sendBCoinReport():
     if(len(d_telegram["telegram_chat_id"]) <= 0 or d_telegram["enable_coin_report"] is False):
@@ -300,33 +363,37 @@ def sendBCoinReport():
     time.sleep(3)
 
     coin = positions(coin_icon)
-    if len(coin) > 0:
-        rx, ry, _, _ = coin[0]
 
-        sct_img = printSreen()
+    if len(coin) <= 0:
+        return
 
-        w = 420
-        h = 200
-        x_offset = 0
-        y_offset = 20
+    rx, ry, _, _ = coin[0]
 
-        y = ry - y_offset
-        x = rx + x_offset
+    sct_img = printSreen()
 
-        crop_img = sct_img[ y : y + h , x: x + w]
+    w = 420
+    h = 200
+    x_offset = 0
+    y_offset = 25
 
-        cv2.imwrite('bcoin-report.png', crop_img)
-        time.sleep(1)
-        try:
-            for chat_id in d_telegram["telegram_chat_id"]:
-                bot.send_document(chat_id=chat_id, document=open('bcoin-report.png', 'rb'))
-        except:
-            logger("Telegram offline...")
-            
+    y = ry - y_offset
+    x = rx + x_offset
+
+    crop_img = sct_img[ y : y + h , x: x + w]
+    #resized = cv2.resize(crop_img, (500, 250))
+
+    cv2.imwrite('bcoin-report.png', crop_img)
+    time.sleep(1)
+    try:
+        for chat_id in d_telegram["telegram_chat_id"]:
+            bot.send_document(chat_id=chat_id, document=open('bcoin-report.png', 'rb'))
+    except:
+        logger("Telegram offline...")
+         
     clickBtn(x_button_img)
-    logger(" ==> 💰 BCoin Report sent. ", False, True)
+    logger("💰 BCoin Report sent. ", False, True)
 
-def clickBtn(img, name=None, timeout=3, trashhold=ct['default']):
+def clickBtn(img, name=None, timeout=3, threshold=ct['default']):
     global open_secound_account
 
     logger(None, progress_indicator=True)
@@ -336,7 +403,7 @@ def clickBtn(img, name=None, timeout=3, trashhold=ct['default']):
     start = time.time()
     clicked = False
     while(not clicked):
-        matches = positions(img, trashhold=trashhold)
+        matches = positions(img, threshold=threshold)
         if(len(matches)==0):
             hast_timed_out = time.time()-start > timeout
             if(hast_timed_out):
@@ -350,11 +417,9 @@ def clickBtn(img, name=None, timeout=3, trashhold=ct['default']):
         x,y,w,h = matches[0]
 
         if (open_secound_account and c['usage_multi_account']):
-            pyautogui.moveTo(x+c['screen_width']+(w/2),y+(h/2),1)
-            #logger('Move screen rigth')
+            randomMouseMovement(False, x+c['screen_width']+(w/2), y+(h/2))
         else:
-            pyautogui.moveTo(x+(w/2),y+(h/2),1)
-            #logger('Move screen left')
+            randomMouseMovement(False, x+(w/2), y+(h/2))
 
         pyautogui.doubleClick()
         return True
@@ -382,31 +447,36 @@ def printSreen():
         #sct_img = np.array(sct.grab(sct.monitors[0]))
         return sct_img[:,:,:3]
 
-def positions(target, trashhold=ct['default']):
-    img = printSreen()
-    result = cv2.matchTemplate(img,target,cv2.TM_CCOEFF_NORMED)
+def positions(target, threshold=ct['default'], layout=False):
+    if layout is False:
+        screenshot = printSreen()
+    else:
+        screenshot = layout
+
+    result = cv2.matchTemplate(screenshot,target,cv2.TM_CCOEFF_NORMED)
     w = target.shape[1]
     h = target.shape[0]
 
-    yloc, xloc = np.where(result >= trashhold)
+    yloc, xloc = np.where(result >= threshold)
 
     rectangles = []
     for (x, y) in zip(xloc, yloc):
         rectangles.append([int(x), int(y), int(w), int(h)])
         rectangles.append([int(x), int(y), int(w), int(h)])
 
-    rectangles, weights = cv2.groupRectangles(rectangles, 1, 0.2)
+    rectangles, _ = cv2.groupRectangles(rectangles, 1, 0.2)
+    
     return rectangles
 
 def scroll():
-    commoms = positions(common_label, trashhold=ct['commom'])
+    commoms = positions(common_label, threshold=ct['commom'])
     if (len(commoms) == 0):
         # print('no commom text found')
         return
     x,y,w,h = commoms[len(commoms)-1]
     # print('moving to {},{} and scrolling'.format(x,y))
 
-    pyautogui.moveTo(x,y,1)
+    randomMouseMovement(False, x, y)
 
     if not c['use_click_and_drag_instead_of_scroll']:
         pyautogui.scroll(-c['scroll_size'])
@@ -414,10 +484,10 @@ def scroll():
         pyautogui.dragRel(0, -c['click_and_drag_amount'], duration=1, button='left')
 
 def clickButtons():
-    buttons = positions(go_work_img, trashhold=ct['go_to_work_btn'])
+    buttons = positions(go_work_img, threshold=ct['go_to_work_btn'])
     # print('buttons: {}'.format(len(buttons)))
     for (x, y, w, h) in buttons:
-        pyautogui.moveTo(x+(w/2),y+(h/2),1)
+        randomMouseMovement(False, x+(w/2), y+(h/2))
         pyautogui.click()
         global hero_clicks
         hero_clicks = hero_clicks + 1
@@ -440,9 +510,9 @@ def isWorking(bar, buttons):
 def clickGreenBarButtons():
     # ele clicka nos q tao trabaiano mas axo q n importa
     offset = 130
-    green_bars = positions(green_bar, trashhold=ct['green_bar'])
+    green_bars = positions(green_bar, threshold=ct['green_bar'])
     logger('%d green bars detected' % len(green_bars))
-    buttons = positions(go_work_img, trashhold=ct['go_to_work_btn'])
+    buttons = positions(go_work_img, threshold=ct['go_to_work_btn'])
     logger('%d buttons detected' % len(buttons))
 
     not_working_green_bars = []
@@ -456,7 +526,7 @@ def clickGreenBarButtons():
     # se tiver botao com y maior que bar y-10 e menor que y+10
     for (x, y, w, h) in not_working_green_bars:
         # isWorking(y, buttons)
-        pyautogui.moveTo(x+offset+(w/2),y+(h/2),1)
+        randomMouseMovement(False, x+offset+(w/2), y+(h/2))
         pyautogui.click()
         global hero_clicks
         hero_clicks = hero_clicks + 1
@@ -468,8 +538,8 @@ def clickGreenBarButtons():
 
 def clickFullBarButtons():
     offset = 100
-    full_bars = positions(full_stamina, trashhold=ct['default'])
-    buttons = positions(go_work_img, trashhold=ct['go_to_work_btn'])
+    full_bars = positions(full_stamina, threshold=ct['default'])
+    buttons = positions(go_work_img, threshold=ct['go_to_work_btn'])
 
     not_working_full_bars = []
     for bar in full_bars:
@@ -480,7 +550,7 @@ def clickFullBarButtons():
         logger('👷🏽 Clicking in %d heroes.' % len(not_working_full_bars))
 
     for (x, y, w, h) in not_working_full_bars:
-        pyautogui.moveTo(x+offset+(w/2),y+(h/2),1)
+        randomMouseMovement(False, x+offset+(w/2), y+(h/2))
         pyautogui.click()
         global hero_clicks
         hero_clicks = hero_clicks + 1
@@ -520,9 +590,9 @@ def login():
         login_attempts = 0
         
         if (open_secound_account and c['usage_multi_account']):
-            pyautogui.moveTo(c['screen_width']+(c['screen_width']/2), c['screen_height']/2, 1)
+            randomMouseMovement(False, c['screen_width']+(c['screen_width']/2), c['screen_height']/2)
         else:
-            pyautogui.moveTo(c['screen_width']/2, c['screen_height']/2, 1)
+            randomMouseMovement(False, c['screen_width']/2, c['screen_height']/2)
 
         pyautogui.click()
 
@@ -596,18 +666,36 @@ def refreshHeroes():
     logger('👷🏽 {} heroes sent to work so far'.format(hero_clicks), False, True)
     goToGame()
 
-def randomMouseMovement():
+def getRandonPixels(range = 5):
+    return np.random.randint(-range, range)
+
+def randomMouseMovement(v_rand=True,x=c['screen_width'], y=c['screen_height']):
     effects = [
         pyautogui.easeInQuad, 
         pyautogui.easeOutQuad, 
         pyautogui.easeInOutQuad,
         pyautogui.easeInBounce,
         pyautogui.easeInElastic
-        ]
-    x = np.random.randint(0, c['screen_width'])
-    y = np.random.randint(0, c['screen_height'])
-    e = np.random.choice(effects)
-    pyautogui.moveTo(x, y, np.random.randint(1,2), e)
+    ]
+
+    if (v_rand):
+        xAccount2 = np.random.randint(0, x+(x/2))
+        xAccount1 = np.random.randint(0, x)
+        yAccount = np.random.randint(0, y)
+    else:
+        xAccount2 = x
+        xAccount1 = x
+        yAccount = y
+
+    if (open_secound_account and c['usage_multi_account']):
+        rx = xAccount2 + getRandonPixels()
+    else:
+        rx = xAccount1 + getRandonPixels()
+
+    ry = yAccount + getRandonPixels()
+
+    choice = np.random.choice(effects)
+    pyautogui.moveTo(rx, ry, np.random.randint(1,2), choice)
 
 def main():
     time.sleep(5)
@@ -661,6 +749,7 @@ def main():
                 global new_map_clicks
                 new_map_clicks = new_map_clicks + 1
                 logger('🗺️ {} - New Map button clicked!'.format(new_map_clicks), False, True)
+                sendMapReport()
                 randomMouseMovement()
 
         if now - last["refresh_heroes"] > np.random.randint(rhp['init'],rhp['end']) * 60 :
