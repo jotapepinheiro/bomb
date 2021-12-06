@@ -199,9 +199,9 @@ def solveCapcha():
     randomMouseMovement(False, x, y)
     pyautogui.mouseDown()
     if (open_secound_account and c['usage_multi_account']):
-        randomMouseMovement(False, x+c['screen_width']+300, y)
+        pyautogui.moveTo(x+c['screen_width']+300, y, 1)
     else:
-        randomMouseMovement(False, x+300, y)
+        pyautogui.moveTo(x+300, y, 1)
 
     pieces_end_pos = getPiecesPosition()
     if pieces_end_pos is None:
@@ -225,9 +225,9 @@ def solveCapcha():
     # arr = np.array([[int(piece_start),int(y-20),int(10),int(10)],[int(piece_middle),int(y-20),int(10),int(10)],[int(piece_end-20),int(y),int(10),int(10)],[int(slider_awnser),int(y),int(20),int(20)]])
 
     if (open_secound_account and c['usage_multi_account']):
-        randomMouseMovement(False, slider_awnser+c['screen_width'], y)
+        pyautogui.moveTo(slider_awnser+c['screen_width'], y, 1)
     else:
-        randomMouseMovement(False, slider_awnser, y)
+        pyautogui.moveTo(slider_awnser, y, 1)
 
     pyautogui.mouseUp()
 
@@ -291,7 +291,7 @@ def sendMapReport():
     if(len(d_telegram["telegram_chat_id"]) <= 0 or d_telegram["enable_map_report"] is False):
         return
 
-    time.sleep(3)
+    time.sleep(np.random.randint(3, 5))
 
     back = positions(arrow_img)
     
@@ -365,7 +365,7 @@ def sendBCoinReport():
     except:
         return
 
-    time.sleep(3)
+    time.sleep(np.random.randint(3, 5))
 
     coin = positions(coin_icon)
 
@@ -377,9 +377,9 @@ def sendBCoinReport():
     sct_img = printSreen()
 
     w = 420
-    h = 200
+    h = 195
     x_offset = 0
-    y_offset = 25
+    y_offset = 15
 
     y = ry - y_offset
     x = rx + x_offset
@@ -568,9 +568,9 @@ def goToHeroes():
         login_attempts = 0
 
     solveCapcha()
-    time.sleep(1)
+    time.sleep(np.random.randint(1, 3))
     clickBtn(hero_img)
-    time.sleep(1)
+    time.sleep(np.random.randint(1, 3))
     solveCapcha()
 
 def goToGame():
@@ -665,11 +665,11 @@ def refreshHeroes():
         if buttonsClicked == 0:
             empty_scrolls_attempts = empty_scrolls_attempts - 1
         scroll()
-        time.sleep(2)
+        time.sleep(np.random.randint(1, 3))
     logger('👷🏽 {} heroes sent to work so far'.format(hero_clicks), False, True)
     goToGame()
 
-def getRandonPixels(range = 5):
+def getRandonPixels(range=10):
     return np.random.randint(-range, range)
 
 def randomMouseMovement(v_rand=True,x=c['screen_width'], y=c['screen_height']):
@@ -678,7 +678,13 @@ def randomMouseMovement(v_rand=True,x=c['screen_width'], y=c['screen_height']):
         pyautogui.easeOutQuad, 
         pyautogui.easeInOutQuad,
         pyautogui.easeInBounce,
-        pyautogui.easeInElastic
+        pyautogui.easeInElastic,
+        pyautogui.easeOutElastic,
+        pyautogui.easeInOutElastic,
+        pyautogui.easeInBack,
+        pyautogui.easeOutBack,
+        pyautogui.easeInOutBack,
+        pyautogui.easeInCirc
     ]
 
     if (v_rand):
@@ -686,8 +692,7 @@ def randomMouseMovement(v_rand=True,x=c['screen_width'], y=c['screen_height']):
         xAccount1 = np.random.randint(0, x)
         yAccount = np.random.randint(0, y)
     else:
-        xAccount2 = x
-        xAccount1 = x
+        xAccount2 = xAccount1 = x
         yAccount = y
 
     if (open_secound_account and c['usage_multi_account']):

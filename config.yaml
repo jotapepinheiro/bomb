@@ -41,8 +41,8 @@ threshold:
   default: 0.7
   commom: 0.8
   select_wallet_buttons: 0.8
-  go_to_work_btn: 0.9
-  green_bar: 0.9
+  go_to_work_btn: 0.8
+  green_bar: 0.8
 
 game:
   game_width: 941
