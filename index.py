@@ -758,6 +758,9 @@ def main():
                 global new_map_clicks
                 new_map_clicks = new_map_clicks + 1
                 logger('🗺️ {} - New Map button clicked!'.format(new_map_clicks), False, True)
+                randomMouseMovement()
+                solveCapcha()
+                time.sleep(np.random.randint(3, 5))
                 sendMapReport()
                 randomMouseMovement()
 
