@@ -721,8 +721,6 @@ def main():
 
     logger('🏁 Starting...', False, True)
 
-    sendBCoinReport()
-
     while True:
         now = time.time()
 
