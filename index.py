@@ -196,7 +196,7 @@ def solveCapcha():
         return "fail"
 
     x,y = slider_start_pos
-    randomMouseMovement(False, x, y)
+    pyautogui.moveTo(x, y, 1)
     pyautogui.mouseDown()
     if (open_secound_account and c['usage_multi_account']):
         pyautogui.moveTo(x+c['screen_width']+300, y, 1)
@@ -385,6 +385,7 @@ def sendBCoinReport():
     x = rx + x_offset
 
     crop_img = sct_img[ y : y + h , x: x + w]
+
     #resized = cv2.resize(crop_img, (500, 250))
 
     cv2.imwrite('bcoin-report.png', crop_img)
