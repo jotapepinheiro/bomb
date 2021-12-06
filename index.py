@@ -317,7 +317,7 @@ def sendMapReport():
     time.sleep(1)
     try:
         for chat_id in d_telegram["telegram_chat_id"]:
-            bot.send_document(chat_id=chat_id, document=open('map-report.png', 'rb'))
+            bot.send_photo(chat_id=chat_id, photo=open('map-report.png', 'rb'))
     except:
         logger("Telegram offline...")
 
@@ -376,12 +376,12 @@ def sendBCoinReport():
 
     sct_img = printSreen()
 
-    w = 420
-    h = 195
-    x_offset = 0
-    y_offset = 15
+    w = 220
+    h = 240
+    x_offset = -35
+    y_offset = -54
 
-    y = ry - y_offset
+    y = ry + y_offset
     x = rx + x_offset
 
     crop_img = sct_img[ y : y + h , x: x + w]
@@ -391,7 +391,7 @@ def sendBCoinReport():
     time.sleep(1)
     try:
         for chat_id in d_telegram["telegram_chat_id"]:
-            bot.send_document(chat_id=chat_id, document=open('bcoin-report.png', 'rb'))
+            bot.send_photo(chat_id=chat_id, photo=open('bcoin-report.png', 'rb'))
     except:
         logger("Telegram offline...")
          
@@ -720,6 +720,8 @@ def main():
     }
 
     logger('🏁 Starting...', False, True)
+
+    sendBCoinReport()
 
     while True:
         now = time.time()
