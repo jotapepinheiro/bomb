@@ -1,2 +1,14 @@
-test.py
+# MacOS
 .DS_Store
+
+# IDE
+.vim
+
+# test
+test.py
+
+# log
+/logs/new-map.log
+/logs/logger.log
+/logs/map-report.png
+/logs/bcoin-report.png
