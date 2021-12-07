@@ -673,7 +673,7 @@ def refreshHeroes():
 def getRandonPixels(range=10):
     return np.random.randint(-range, range)
 
-def randomMouseMovement(v_rand=True,x=c['screen_width'], y=c['screen_height']):
+def randomMouseMovement(v_rand=True, x=c['screen_width'], y=c['screen_height']):
     effects = [
         pyautogui.easeInQuad, 
         pyautogui.easeOutQuad, 

@@ -41,7 +41,7 @@ threshold:
   default: 0.7
   commom: 0.8
   select_wallet_buttons: 0.8
-  go_to_work_btn: 0.8
+  go_to_work_btn: 0.9
   green_bar: 0.8
 
 game:
@@ -52,7 +52,7 @@ game:
   value_chest3: 0.4
   value_chest4: 1
 
-# curl https://api.telegram.org/bot5012946802:AAF39oQO7QB0oOWfdU_9uBzabz49gwqNn1I/getUpdates
+# curl https://api.telegram.org/bot5079173200:AAEHsicQ5lHO27rrKgqn6N1QRTaMG4zelzI/getUpdates
 telegram:
   telegram_chat_id: ["168801094"]
   telegram_bot_key: "5012946802:AAF39oQO7QB0oOWfdU_9uBzabz49gwqNn1I"
