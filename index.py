@@ -23,11 +23,15 @@ cnm = t['check_for_new_map_button']
 cfl = t['check_for_login']
 ibm = t['interval_between_moviments']
 
+if not c['usage_multi_account']:
+    print('>>---> Mult Account not enabled')
+print('\n')
+
 # Initialize telegram
 try:
     bot = telegram.Bot(token=d_telegram["telegram_bot_key"])
 except:
-    print("⛔ Bot not initialized! See configuration file.")
+    print(">>--->Bot not initialized! See configuration file.\n")
 
 pyautogui.PAUSE = np.random.randint(ibm['init'],ibm['end'])
 
@@ -37,6 +41,19 @@ new_map_clicks = 0
 login_attempts = 0
 open_secound_account = True
 last_log_is_progress = False
+
+COLOR = {
+    'blue': '\033[94m',
+    'default': '\033[99m',
+    'grey': '\033[90m',
+    'yellow': '\033[93m',
+    'black': '\033[90m',
+    'cyan': '\033[96m',
+    'green': '\033[92m',
+    'magenta': '\033[95m',
+    'white': '\033[97m',
+    'red': '\033[91m'
+}
 
 go_work_img = cv2.imread('targets/go-work.png')
 common_label = cv2.imread('targets/common-label.png')
@@ -80,15 +97,13 @@ def findPuzzlePieces(result, piece_img, threshold=0.5):
     r, weights = cv2.groupRectangles(r, 1, 0.2)
 
     if len(r) < 2:
-        # print('threshold = %.3f' % threshold)
         return findPuzzlePieces(result, piece_img,threshold-0.01)
 
     if len(r) == 2:
-        # print('match')
         return r
 
     if len(r) > 2:
-        # print('overshoot by %d' % len(r))
+        logger('💀 Overshoot by %d' % len(r))
         return r
 
 def getRightPiece(puzzle_pieces):
@@ -147,16 +162,8 @@ def getPiecesPosition(t=150):
     cropped = img[ y : y + h , x: x + w]
     blurred = cv2.GaussianBlur(cropped, (3, 3), 0)
     edges = cv2.Canny(blurred, threshold1=t/2, threshold2=t,L2gradient=True)
-    # img = cv2.Laplacian(img,cv2.CV_64F)
-
-    # gray_piece_img = cv2.cvtColor(piece, cv2.COLOR_BGR2GRAY)
     piece_img = cv2.cvtColor(piece, cv2.COLOR_BGR2GRAY)
-    # print('----')
-    # print(piece_img.shape)
-    # print(edges.shape)
-    # print('----')
-    # piece_img = cv2.Canny(gray_piece_img, threshold1=t/2, threshold2=t,L2gradient=True)
-    # result = cv2.matchTemplate(edges,piece_img,cv2.TM_CCOEFF_NORMED)
+
     result = cv2.matchTemplate(edges,piece_img,cv2.TM_CCORR_NORMED)
 
     puzzle_pieces = findPuzzlePieces(result, piece_img)
@@ -187,24 +194,27 @@ def getSliderPosition():
 def solveCapcha():
     global open_secound_account
 
+    logger('🧩 Checking for captcha')
     pieces_start_pos = getPiecesPosition()
     if pieces_start_pos is None :
         return "not-found"
 
     slider_start_pos = getSliderPosition()
     if slider_start_pos is None:
+        logger('🧩 slider_start_pos')
         return "fail"
 
     x,y = slider_start_pos
     pyautogui.moveTo(x, y, 1)
     pyautogui.mouseDown()
     if (open_secound_account and c['usage_multi_account']):
-        pyautogui.moveTo(x+c['screen_width']+300, y, 1)
+        pyautogui.moveTo(x+c['screen_width']+300, y, 0.5)
     else:
-        pyautogui.moveTo(x+300, y, 1)
+        pyautogui.moveTo(x+300, y, 0.5)
 
     pieces_end_pos = getPiecesPosition()
     if pieces_end_pos is None:
+        logger('🧩 pieces_end_pos')
         return "fail"
 
     piece_start, _, _, _ = getLeftPiece(pieces_start_pos)
@@ -213,6 +223,7 @@ def solveCapcha():
     slider_start, _, = slider_start_pos
     slider_end_pos = getSliderPosition()
     if slider_end_pos is None:
+        logger('🧩 slider_end_pos')
         return "fail"
 
     slider_end, _ = slider_end_pos
@@ -225,9 +236,9 @@ def solveCapcha():
     # arr = np.array([[int(piece_start),int(y-20),int(10),int(10)],[int(piece_middle),int(y-20),int(10),int(10)],[int(piece_end-20),int(y),int(10),int(10)],[int(slider_awnser),int(y),int(20),int(20)]])
 
     if (open_secound_account and c['usage_multi_account']):
-        pyautogui.moveTo(slider_awnser+c['screen_width'], y, 1)
+        pyautogui.moveTo(slider_awnser+c['screen_width'], y, 0.5)
     else:
-        pyautogui.moveTo(slider_awnser, y, 1)
+        pyautogui.moveTo(slider_awnser, y, 0.5)
 
     pyautogui.mouseUp()
 
@@ -244,49 +255,56 @@ def sendTelegramMessage(message):
     except:
         print("⛔ Unable to send telegram message. See configuration file.")
 
-def logger(message, progress_indicator = False, telegram = False):
+def dateFormatted(format = '%Y-%m-%d %H:%M:%S'):
+    datetime = time.localtime()
+    formatted = time.strftime(format, datetime)
+    return formatted
+
+def logger(message, progress_indicator = False, telegram = False, color = 'default'):
     global last_log_is_progress
 
-    # Start progress indicator and append dots to in subsequent progress calls
-    if progress_indicator:
-        if not last_log_is_progress:
-            last_log_is_progress = True
-            sys.stdout.write('\n => .')
-            sys.stdout.flush()
-        else:
-            sys.stdout.write('.')
-            sys.stdout.flush()
+    color_formatted = COLOR.get(color.lower(), COLOR['default'])
 
-        return
-
-    if last_log_is_progress:
-        sys.stdout.write('\n\n')
-        sys.stdout.flush()
-        last_log_is_progress = False
-
-    datetime = time.localtime()
-    formatted_datetime = time.strftime("%d/%m/%Y %H:%M:%S", datetime)
+    formatted_datetime = dateFormatted()
 
     if (open_secound_account and c['usage_multi_account']):
         account = "Account 2"
     else:
         account = "Account 1"
 
-    formatted_message = "{} - [{}] \n => {} \n\n".format(account, formatted_datetime, message)
+    formatted_message = "{} - [{}] \n => {} \n".format(account, formatted_datetime, message)
+    formatted_message_colored  = color_formatted + formatted_message + '\033[0m'
 
-    print(formatted_message)
+    # Start progress indicator and append dots to in subsequent progress calls
+    if progress_indicator:
+        if not last_log_is_progress:
+            last_log_is_progress = True
+            formatted_message = color_formatted + "{} - [{}] \n => {} \n".format(account, formatted_datetime, '⬆️  Processing last action..')
+            sys.stdout.write(formatted_message)
+            sys.stdout.flush()
+        else:
+            sys.stdout.write(color_formatted + '.')
+            sys.stdout.flush()
+        return
+
+    if last_log_is_progress:
+        sys.stdout.write('\n')
+        sys.stdout.flush()
+        last_log_is_progress = False    
+
+    print(formatted_message_colored)
 
     if telegram == True:
         sendTelegramMessage(formatted_message)
 
     if (c['save_log_to_file'] == True):
-        logger_file = open("logger.log", "a")
-        logger_file.write(formatted_message)
+        logger_file = open("./logs/logger.log", "a", encoding='utf-8')
+        logger_file.write(formatted_message + '\n')
         logger_file.close()
 
     return True
 
-   # Sent MAP report to telegram
+# Send MAP report to telegram
 def sendMapReport():
     if(len(d_telegram["telegram_chat_id"]) <= 0 or d_telegram["enable_map_report"] is False):
         return
@@ -313,11 +331,11 @@ def sendMapReport():
     crop_img = sct_img[ y : y + h , x: x + w]
     #resized = cv2.resize(crop_img, (500, 250))
 
-    cv2.imwrite('map-report.png', crop_img)
+    cv2.imwrite('./logs/map-report.png', crop_img)
     time.sleep(1)
     try:
         for chat_id in d_telegram["telegram_chat_id"]:
-            bot.send_photo(chat_id=chat_id, photo=open('map-report.png', 'rb'))
+            bot.send_photo(chat_id=chat_id, photo=open('./logs/map-report.png', 'rb'))
     except:
         logger("Telegram offline...")
 
@@ -388,11 +406,11 @@ def sendBCoinReport():
 
     #resized = cv2.resize(crop_img, (500, 250))
 
-    cv2.imwrite('bcoin-report.png', crop_img)
+    cv2.imwrite('./logs/bcoin-report.png', crop_img)
     time.sleep(1)
     try:
         for chat_id in d_telegram["telegram_chat_id"]:
-            bot.send_photo(chat_id=chat_id, photo=open('bcoin-report.png', 'rb'))
+            bot.send_photo(chat_id=chat_id, photo=open('./logs/bcoin-report.png', 'rb'))
     except:
         logger("Telegram offline...")
          
@@ -421,11 +439,12 @@ def clickBtn(img, name=None, timeout=3, threshold=ct['default']):
             continue
 
         x,y,w,h = matches[0]
-
+        pos_click_x = x+(w/2)
+        pos_click_y = y+(h/2)
         if (open_secound_account and c['usage_multi_account']):
-            randomMouseMovement(False, x+c['screen_width']+(w/2), y+(h/2))
+            randomMouseMovement(False, pos_click_x+c['screen_width'], pos_click_y)
         else:
-            randomMouseMovement(False, x+(w/2), y+(h/2))
+            randomMouseMovement(False, pos_click_x, pos_click_y)
 
         pyautogui.doubleClick()
         return True
@@ -435,6 +454,7 @@ def printSreen():
 
     with mss.mss() as sct:
         # The screen part to capture
+        # monitor = sct.monitors[0]
         if (open_secound_account and c['usage_multi_account']):
             monitor = {"top": 0, 
             "left": c['screen_width'], 
@@ -450,7 +470,6 @@ def printSreen():
 
         # Grab the data
         sct_img = np.array(sct.grab(monitor))
-        #sct_img = np.array(sct.grab(sct.monitors[0]))
         return sct_img[:,:,:3]
 
 def positions(target, threshold=ct['default'], layout=False):
@@ -479,7 +498,7 @@ def scroll():
     if (len(commoms) == 0):
         # print('no commom text found')
         return
-    x,y,w,h = commoms[len(commoms)-1]
+    x,y,_,_ = commoms[len(commoms)-1]
     # print('moving to {},{} and scrolling'.format(x,y))
 
     randomMouseMovement(False, x, y)
@@ -517,17 +536,17 @@ def clickGreenBarButtons():
     # ele clicka nos q tao trabaiano mas axo q n importa
     offset = 130
     green_bars = positions(green_bar, threshold=ct['green_bar'])
-    logger('%d green bars detected' % len(green_bars))
+    logger('🟩 %d green bars detected' % len(green_bars))
     buttons = positions(go_work_img, threshold=ct['go_to_work_btn'])
-    logger('%d buttons detected' % len(buttons))
+    logger('🆗 %d buttons detected' % len(buttons))
 
     not_working_green_bars = []
     for bar in green_bars:
         if not isWorking(bar, buttons):
             not_working_green_bars.append(bar)
     if len(not_working_green_bars) > 0:
-        logger('%d buttons with green bar detected' % len(not_working_green_bars))
-        logger('👷🏽 Clicking in %d heroes.' % len(not_working_green_bars))
+        logger('🆗 %d buttons with green bar detected' % len(not_working_green_bars))
+        logger('👆 Clicking in %d heroes.' % len(not_working_green_bars))
 
     # se tiver botao com y maior que bar y-10 e menor que y+10
     for (x, y, w, h) in not_working_green_bars:
@@ -553,7 +572,7 @@ def clickFullBarButtons():
             not_working_full_bars.append(bar)
 
     if len(not_working_full_bars) > 0:
-        logger('👷🏽 Clicking in %d heroes.' % len(not_working_full_bars))
+        logger('👆 Clicking in %d heroes.' % len(not_working_full_bars))
 
     for (x, y, w, h) in not_working_full_bars:
         randomMouseMovement(False, x+offset+(w/2), y+(h/2))
@@ -563,6 +582,20 @@ def clickFullBarButtons():
     
     return len(not_working_full_bars)
 
+def loggerMapClicked():
+    global new_map_clicks
+    new_map_clicks = new_map_clicks + 1
+    logger('🗺️ {} - New Map button clicked!'.format(new_map_clicks), False, True)
+    logger_file = open("./logs/new-map.log", "a", encoding='utf-8')
+    logger_file.write(dateFormatted() + '\n')
+    logger_file.close()
+
+    randomMouseMovement()
+    solveCapcha()
+    time.sleep(np.random.randint(3, 5))
+    sendMapReport()
+    randomMouseMovement()
+
 def goToHeroes():
     if clickBtn(arrow_img):
         global login_attempts
@@ -570,29 +603,36 @@ def goToHeroes():
 
     solveCapcha()
     time.sleep(np.random.randint(1, 3))
+    randomMouseMovement()
     clickBtn(hero_img)
     time.sleep(np.random.randint(1, 3))
+    randomMouseMovement()
     solveCapcha()
 
 def goToGame():
     # in case of server overload popup
     clickBtn(x_button_img)
+    randomMouseMovement()
     # time.sleep(3)
     clickBtn(x_button_img)
-
+    randomMouseMovement()
     clickBtn(teasureHunt_icon_img)
 
 def refreshHeroesPositions():
+    logger('🔃 Refreshing Heroes Positions')
     clickBtn(arrow_img)
     clickBtn(teasureHunt_icon_img)
+    randomMouseMovement()
     # time.sleep(3)
     clickBtn(teasureHunt_icon_img)
+    randomMouseMovement()
 
 def login():
     global login_attempts
+    logger('😿 Checking if game has disconnected')
 
     if login_attempts > 3:
-        logger('Too many login attempts, refreshing.')
+        logger('🔃 Too many login attempts, refreshing.')
         login_attempts = 0
         
         if (open_secound_account and c['usage_multi_account']):
@@ -643,14 +683,16 @@ def login():
         # print('ok button clicked')
 
 def refreshHeroes():
+    logger('🏢 Search for heroes to work', False, True)
+
     goToHeroes()
 
     if c['select_heroes_mode'] == "full":
-        logger("Sending heroes with full stamina bar to work!")
+        logger("⚒️ Sending heroes with full stamina bar to work!", 'green')
     elif c['select_heroes_mode'] == "green":
-        logger("Sending heroes with green stamina bar to work!")
+        logger("⚒️ Sending heroes with green stamina bar to work!", 'green')
     else:
-        logger("Sending all heroes to work!")
+        logger("⚒️ Sending all heroes to work!", 'green')
 
     buttonsClicked = 1
     empty_scrolls_attempts = c['scroll_attemps']
@@ -667,7 +709,7 @@ def refreshHeroes():
             empty_scrolls_attempts = empty_scrolls_attempts - 1
         scroll()
         time.sleep(np.random.randint(1, 3))
-    logger('👷🏽 {} heroes sent to work so far'.format(hero_clicks), False, True)
+    logger('💪 {} heroes sent to work'.format(hero_clicks), False, True)
     goToGame()
 
 def getRandonPixels(range=10):
@@ -704,6 +746,7 @@ def randomMouseMovement(v_rand=True, x=c['screen_width'], y=c['screen_height']):
     ry = yAccount + getRandonPixels()
 
     choice = np.random.choice(effects)
+    time.sleep(0.5)
     pyautogui.moveTo(rx, ry, np.random.randint(1,2), choice)
 
 def main():
@@ -726,48 +769,38 @@ def main():
         now = time.time()
 
         if now - last["login"] > np.random.randint(cfl['init'],cfl['end']) * 60:
-            logger("⛔ Checking if game has disconnected.")
             sys.stdout.flush()
             last["login"] = now
             if c['usage_multi_account']:
                 open_secound_account = not open_secound_account
-                logger('Secound Account Positions {}'.format(open_secound_account))
+                logger('🆎 Secound Account Positions {}'.format(open_secound_account))
             login()
             randomMouseMovement()
 
         if now - last["check_for_capcha"] > t['check_for_capcha'] * 60:
             last["check_for_capcha"] = now
-            logger('🔒 Checking for capcha.')
             solveCapcha()
+            randomMouseMovement()
 
         if now - last["bcoin_report"] > t['bcoin_report'] * 60:
             last["bcoin_report"] = now
             sendBCoinReport()
+            randomMouseMovement()
 
         if now - last["heroes"] > np.random.randint(shw['init'],shw['end']) * 60:
             last["heroes"] = now
-            logger('🔨 Sending heroes to work.', False, True)
             refreshHeroes()
             randomMouseMovement()
 
         if now - last["new_map"] > np.random.randint(cnm['init'],cnm['end']):
             last["new_map"] = now
             if clickBtn(new_map_btn_img):
-                with open('new-map.log','a') as new_map_log:
-                    new_map_log.write(str(time.time())+'\n')
-                global new_map_clicks
-                new_map_clicks = new_map_clicks + 1
-                logger('🗺️ {} - New Map button clicked!'.format(new_map_clicks), False, True)
-                randomMouseMovement()
-                solveCapcha()
-                time.sleep(np.random.randint(3, 5))
-                sendMapReport()
-                randomMouseMovement()
+                loggerMapClicked()
+            randomMouseMovement()
 
         if now - last["refresh_heroes"] > np.random.randint(rhp['init'],rhp['end']) * 60 :
             solveCapcha()
             last["refresh_heroes"] = now
-            logger('📍 Refreshing Heroes Positions.')
             refreshHeroesPositions()
 
         randomMouseMovement()

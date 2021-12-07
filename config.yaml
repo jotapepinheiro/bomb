@@ -42,7 +42,7 @@ threshold:
   commom: 0.8
   select_wallet_buttons: 0.8
   go_to_work_btn: 0.9
-  green_bar: 0.8
+  green_bar: 0.9
 
 game:
   game_width: 941
@@ -52,7 +52,7 @@ game:
   value_chest3: 0.4
   value_chest4: 1
 
-# curl https://api.telegram.org/bot5079173200:AAEHsicQ5lHO27rrKgqn6N1QRTaMG4zelzI/getUpdates
+# curl https://api.telegram.org/bot5046451378:AAFPztrqKYxFCt-VbIpU8zsmkwYPg-ptW10/getUpdates
 telegram:
   telegram_chat_id: ["168801094"]
   telegram_bot_key: "5012946802:AAF39oQO7QB0oOWfdU_9uBzabz49gwqNn1I"
@@ -77,16 +77,6 @@ click_and_drag_amount: 200
 # green = seleciona os heróis com a barra de stamina verde (metade ou cheia)
 # full  = seleciona somente os heróis com a barra de stamina cheia
 select_heroes_mode: "green"
-
-#utilizado para verificar se o envio (verificação da energia) será geral ou conforme o tipo
-select_heroes_by_rarity: True
-
-#configuração para envio, conforme a raridade, se a configuração acima estiver = "True"
-select_common_heroes_mode: "green"
-select_rare_heroes_mode: "green"
-select_super_rare_heroes_mode: "full"
-select_epic_heroes_mode: "full"
-select_legendary_heroes_mode: "full"
 
 # Opção para salvar os logs em arquivo (logs.txt)
 # Valor padrão : False
