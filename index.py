@@ -368,7 +368,7 @@ Possible quantity chest per type:
 🟣  ==> """+str(c2)+"""
 🟡  ==> """+str(c3)+"""
 🔵  ==> """+str(c4)+"""
-🤪  ==> Jaula """+str(c5)+"""
+🏛  ==> """+str(c5)+"""
 Possible amount : 💣 """+f'{total:.3f} bcoin'+"""
 """
     logger(report, False, True)
