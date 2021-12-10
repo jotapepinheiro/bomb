@@ -870,6 +870,7 @@ def getRandonPixels(range=10):
     return np.random.randint(-range, range)
 
 def randomMouseMovement(v_rand=True, x=c['screen_width'], y=c['screen_height']):
+    pyautogui.FAILSAFE = False
     effects = [
         pyautogui.easeInQuad, 
         pyautogui.easeOutQuad, 
@@ -902,6 +903,7 @@ def randomMouseMovement(v_rand=True, x=c['screen_width'], y=c['screen_height']):
     choice = np.random.choice(effects)
     time.sleep(0.5)
     pyautogui.moveTo(rx, ry, np.random.randint(1,2), choice)
+    pyautogui.FAILSAFE = True
 
 def main():
     time.sleep(5)
