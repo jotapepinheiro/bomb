@@ -308,7 +308,7 @@ def alertCaptcha():
         logger('Captcha box não encontrado')
         return "not-found"
 
-    test = telegram_bot_sendtext("⚠️ ATENÇÃO! \n\n 🧩 RESOLVER CAPTCHA DO JOÃO")
+    test = telegram_bot_sendtext(f'⚠️ ATENÇÃO! \n\n 🧩 RESOLVER CAPTCHA DO {d_telegram["telegram_user_name"]}')
     logger('Captcha!')
 
     #linha para testes
@@ -361,7 +361,7 @@ def alertCaptcha():
         captcha_scshot.save(img_captcha_dir)
 
         #envia a foto do captcha
-        telegram_bot_sendtext(f'Imagem JOÃO /{i + 1}')
+        telegram_bot_sendtext(f'Imagem {d_telegram["telegram_user_name"]} /{i + 1}')
         telegram_bot_sendphoto(img_captcha_dir)
 
     telegram_bot_sendtext('Atenção responda apenas com o número da posição desejada \n\r (/1)\n\r (/2)\n\r (/3)\n\r (/4)\n\r (/5)')
@@ -371,8 +371,8 @@ def alertCaptcha():
     # await user to response
     while True:
         messages_now = bot.getUpdates()
-        if len(messages_now) > qtd_messages_sended and messages_now[len(messages_now) -1].message.text.replace('@BombJoaoBot','').replace('/','').isdigit:
-            user_response = int(messages_now[len(messages_now) -1].message.text.replace('@BombJoaoBot','').replace('/',''))
+        if len(messages_now) > qtd_messages_sended and messages_now[len(messages_now) -1].message.text.replace(d_telegram["telegram_bot_name"],'').replace('/','').isdigit:
+            user_response = int(messages_now[len(messages_now) -1].message.text.replace(d_telegram["telegram_bot_name"],'').replace('/',''))
             break
             
         time.sleep(4)
@@ -481,7 +481,8 @@ def sendMapReport():
         logger("Error finding chests.")
 
     clickBtn(x_button_img)
-    logger("📝 Map Report sent. ", False, True)
+    
+    logger(f'📝 Map Report sent. {d_telegram["telegram_user_name"]}', False, True)
 
 # Send telegram message image
 def telegram_bot_sendphoto(photo_path):
@@ -566,7 +567,7 @@ def sendBCoinReport():
     telegram_bot_sendphoto('./logs/bcoin-report.png')
          
     clickBtn(x_button_img)
-    logger("💰 BCoin Report sent. ", False, True)
+    logger(f'💰 BCoin Report sent. {d_telegram["telegram_user_name"]}', False, True)
 
 def clickBtn(img, name=None, timeout=3, threshold=ct['default']):
     global open_secound_account

@@ -52,10 +52,12 @@ game:
   value_chest3: 0.4
   value_chest4: 1
 
-# curl https://api.telegram.org/bot5012946802:AAF39oQO7QB0oOWfdU_9uBzabz49gwqNn1I/getUpdates
+# curl https://api.telegram.org/bot5068209703:AAHDpDfwby8rvKS04BGAB05uFR_q8NI5OeU/getUpdates
 telegram:
   telegram_chat_id: ["-634132691"]
   telegram_bot_key: "5012946802:AAF39oQO7QB0oOWfdU_9uBzabz49gwqNn1I"
+  telegram_bot_name: "@BombJoaoBot"
+  telegram_user_name: "JOÃO"
   enable_coin_report: True
   enable_map_report: True
 
