@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# coding: utf-8
+
 from cv2 import cv2
 from os import listdir
 
@@ -859,7 +862,7 @@ def refreshHeroes():
             empty_scrolls_attempts = empty_scrolls_attempts - 1
         scroll()
         time.sleep(np.random.randint(1, 3))
-    logger('💪 {} heroes sent to work'.format(hero_clicks), False, True)
+    logger('💪 {} heroes sent to work'.format(hero_clicks))
     goToGame()
 
 def getRandonPixels(range=10):

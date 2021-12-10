@@ -69,6 +69,6 @@ print(text)
 # brew install pytesseract
 # brew install tesseract
 # brew install tesseract-lang
-# brew install imagemagick --with-fontconfig
+# brew install imagemagick
 
 # https://stackoverflow.com/questions/58129505/tesseract-training-finetuning-characters
