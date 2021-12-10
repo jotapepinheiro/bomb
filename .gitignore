@@ -12,3 +12,6 @@ test.py
 /logs/logger.log
 /logs/map-report.png
 /logs/bcoin-report.png
+/logs/captcha.png
+/number.png
+/dev.txt

@@ -1,12 +1,18 @@
 from cv2 import cv2
+from os import listdir
+
 import numpy as np
 import mss
 import pyautogui
 import time
 import sys
+import re
 import telegram
 
 import yaml
+
+import pytesseract as ocr
+from PIL import Image
 
 if __name__ == '__main__':
     stream = open("config.yaml", 'r')
@@ -41,6 +47,7 @@ new_map_clicks = 0
 login_attempts = 0
 open_secound_account = True
 last_log_is_progress = False
+saldo_atual = 0.0
 
 COLOR = {
     'blue': '\033[94m',
@@ -82,6 +89,28 @@ chest2 = cv2.imread('targets/chest2.png')
 chest3 = cv2.imread('targets/chest3.png')
 chest4 = cv2.imread('targets/chest4.png')
 jaula = cv2.imread('targets/jaula.png')
+slider_size_1 = cv2.imread('targets/slider_size_1.png')
+slider_size_2 = cv2.imread('targets/slider_size_2.png')
+slider_size_3 = cv2.imread('targets/slider_size_3.png')
+slider_size_4 = cv2.imread('targets/slider_size_4.png')
+slider_size_5 = cv2.imread('targets/slider_size_5.png')
+slider_size_6 = cv2.imread('targets/slider_size_6.png')
+
+def remove_suffix(input_string, suffix):
+    if suffix and input_string.endswith(suffix):
+        return input_string[:-len(suffix)]
+    return input_string
+    
+def load_images():
+    file_names = listdir('./targets/')
+    targets = {}
+    for file in file_names:
+        path = 'targets/' + file
+        targets[remove_suffix(file, '.png')] = cv2.imread(path)
+
+    return targets
+
+images = load_images()
 
 ###################### puzzle #############
 def findPuzzlePieces(result, piece_img, threshold=0.5):
@@ -191,6 +220,26 @@ def getSliderPosition():
     position = [x+(w/2),y+(h/2)]
     return position
 
+def saveCaptchaSolution(img, pos):
+    path = "./captchas-saved/{}.png".format(str(time.time()))
+    rx, ry, _, _ = pos
+
+    w = 580
+    h = 400
+    x_offset = -140
+    y_offset = 65
+
+    y = ry + y_offset
+    x = rx + x_offset
+    cropped = img[ y : y + h , x: x + w]
+
+    # cv2.imshow('img',cropped)
+    # cv2.waitKey(5000)
+    # exit()
+
+    cv2.imwrite(path, cropped)
+    #TODO tirar um poco de cima
+
 def solveCapcha():
     global open_secound_account
 
@@ -246,14 +295,101 @@ def solveCapcha():
     # show(arr)
     #########################################
 
-# Send telegram message
-def sendTelegramMessage(message):
-    try:
-        if(len(d_telegram["telegram_chat_id"]) > 0):
-            for chat_id in d_telegram["telegram_chat_id"]:
-                bot.send_message(text=message, chat_id=chat_id)
-    except:
-        print("⛔ Unable to send telegram message. See configuration file.")
+def alertCaptcha():
+    global open_secound_account
+
+    current = printSreen()
+    popup_pos = positions(robot, img=current)
+
+    if len(popup_pos) == 0:
+        logger('Captcha box não encontrado')
+        return "not-found"
+
+    test = telegram_bot_sendtext("⚠️ ATENÇÃO! \n\n 🧩 RESOLVER CAPTCHA DO JOÃO")
+    logger('Captcha!')
+
+    #linha para testes
+
+    slider_start_pos = getSliderPosition()
+    if slider_start_pos is None:
+        logger('Posição do slider do captcha não encontrado')
+        return "fail"
+
+    slider_mov = 35
+    slider_size = positions(slider_size_1, threshold=0.9)
+
+    #obten o quanto de pixels o ponteiro tem que arrastar de acordo com o tamanho do slider que aparece
+    numero_sliders = 7 # o número de repetições é a quantidade de imagens do slider-size que tenho + 1
+    for i in range(1, numero_sliders): 
+        slider_size = positions(images[f'slider_size_{i}'], threshold=0.9)
+        if(len(slider_size) > 0):
+            slider_mov = slider_mov + (10 * i)
+            break
+        time.sleep(1)
+    
+    if(len(slider_size) == 0):
+        logger('Tamanho do slider do captcha não encontrado!')
+        return "fail"
+
+    slider_positions = []
+    x,y = slider_start_pos
+    for i in range(5):
+        if i == 0:
+            pyautogui.moveTo(x, y, 1)
+            pyautogui.mouseDown()
+
+            #faz o primeiro movimento e volta para abrir o primeiro item
+            pyautogui.moveTo(x + slider_mov, y, 0.15)
+            pyautogui.moveTo(x, y, 1)
+            slider_positions.append((x, y))
+        else:
+            slider_start_pos = getSliderPosition()
+            x,y = slider_start_pos
+            pyautogui.moveTo(x, y, 0.15)
+            # time.sleep(0.5)
+
+            slider_positions.append((x + slider_mov, y))
+            pyautogui.moveTo(x + slider_mov, y, 0.15)
+
+        # time.sleep(0.5)
+        #encontra a posição do captcha inteiro
+        captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] - 120, popup_pos[0][1] + 80, popup_pos[0][2]*1.9, popup_pos[0][3]*8.3))
+        img_captcha_dir = r'./logs/captcha.png'
+        captcha_scshot.save(img_captcha_dir)
+
+        #envia a foto do captcha
+        telegram_bot_sendtext(f'Imagem JOÃO /{i + 1}')
+        telegram_bot_sendphoto(img_captcha_dir)
+
+    telegram_bot_sendtext('Atenção responda apenas com o número da posição desejada \n\r (/1)\n\r (/2)\n\r (/3)\n\r (/4)\n\r (/5)')
+
+    qtd_messages_sended = len(bot.getUpdates())
+    user_response = 0
+    # await user to response
+    while True:
+        messages_now = bot.getUpdates()
+        if len(messages_now) > qtd_messages_sended and messages_now[len(messages_now) -1].message.text.replace('@BombJoaoBot','').replace('/','').isdigit:
+            user_response = int(messages_now[len(messages_now) -1].message.text.replace('@BombJoaoBot','').replace('/',''))
+            break
+            
+        time.sleep(4)
+
+    if(user_response == 0):
+        user_response = np.random.randint(1, 4)
+        logger(f"Sem resposta do usuário! Gerou o numero {user_response}")
+
+    logger(f"usuario escolheu o numero {user_response}")
+
+    pyautogui.moveTo(slider_positions[user_response-1][0], slider_positions[user_response-1][1], 0.5)
+    pyautogui.moveTo(slider_positions[user_response-1][0] + 4, slider_positions[user_response-1][1] + 3, 0.5)
+    # time.sleep(0.5)
+    pyautogui.mouseUp()
+
+    time.sleep(2)
+    if(len(positions(robot)) == 0):
+        telegram_bot_sendtext('Resolvido')
+    else:
+        telegram_bot_sendtext('Falhou')
 
 def dateFormatted(format = '%Y-%m-%d %H:%M:%S'):
     datetime = time.localtime()
@@ -295,7 +431,7 @@ def logger(message, progress_indicator = False, telegram = False, color = 'defau
     print(formatted_message_colored)
 
     if telegram == True:
-        sendTelegramMessage(formatted_message)
+        telegram_bot_sendtext(formatted_message)
 
     if (c['save_log_to_file'] == True):
         logger_file = open("./logs/logger.log", "a", encoding='utf-8')
@@ -333,11 +469,8 @@ def sendMapReport():
 
     cv2.imwrite('./logs/map-report.png', crop_img)
     time.sleep(1)
-    try:
-        for chat_id in d_telegram["telegram_chat_id"]:
-            bot.send_photo(chat_id=chat_id, photo=open('./logs/map-report.png', 'rb'))
-    except:
-        logger("Telegram offline...")
+
+    telegram_bot_sendphoto('./logs/map-report.png')
 
     try:
         sendPossibleAmountReport(sct_img)
@@ -346,6 +479,24 @@ def sendMapReport():
 
     clickBtn(x_button_img)
     logger("📝 Map Report sent. ", False, True)
+
+# Send telegram message image
+def telegram_bot_sendphoto(photo_path):
+    try:
+        if(len(d_telegram["telegram_chat_id"]) > 0):
+            for chat_id in d_telegram["telegram_chat_id"]:
+                return bot.send_photo(chat_id=chat_id, photo=open(photo_path, 'rb'))
+    except:
+        logger("⛔ Unable to send telegram message. See configuration file.")
+
+# Send telegram message text
+def telegram_bot_sendtext(bot_message):
+    try:
+        if(len(d_telegram["telegram_chat_id"]) > 0):
+            for chat_id in d_telegram["telegram_chat_id"]:
+                return bot.send_message(chat_id=chat_id, text=bot_message)
+    except:
+        logger("⛔ Unable to send telegram message. See configuration file.")
 
 # Count all chests in the map and calculate a value in BCoins.
 def sendPossibleAmountReport(baseImage):
@@ -408,11 +559,8 @@ def sendBCoinReport():
 
     cv2.imwrite('./logs/bcoin-report.png', crop_img)
     time.sleep(1)
-    try:
-        for chat_id in d_telegram["telegram_chat_id"]:
-            bot.send_photo(chat_id=chat_id, photo=open('./logs/bcoin-report.png', 'rb'))
-    except:
-        logger("Telegram offline...")
+
+    telegram_bot_sendphoto('./logs/bcoin-report.png')
          
     clickBtn(x_button_img)
     logger("💰 BCoin Report sent. ", False, True)
@@ -472,13 +620,11 @@ def printSreen():
         sct_img = np.array(sct.grab(monitor))
         return sct_img[:,:,:3]
 
-def positions(target, threshold=ct['default'], layout=False):
-    if layout is False:
-        screenshot = printSreen()
-    else:
-        screenshot = layout
+def positions(target, threshold=ct['default'], img=None):
+    if img is None:
+        img = printSreen()
 
-    result = cv2.matchTemplate(screenshot,target,cv2.TM_CCOEFF_NORMED)
+    result = cv2.matchTemplate(img,target,cv2.TM_CCOEFF_NORMED)
     w = target.shape[1]
     h = target.shape[0]
 
@@ -591,7 +737,8 @@ def loggerMapClicked():
     logger_file.close()
 
     randomMouseMovement()
-    solveCapcha()
+    #solveCapcha()
+    alertCaptcha()
     time.sleep(np.random.randint(3, 5))
     sendMapReport()
     randomMouseMovement()
@@ -601,13 +748,15 @@ def goToHeroes():
         global login_attempts
         login_attempts = 0
 
-    solveCapcha()
+    #solveCapcha()
+    alertCaptcha()
     time.sleep(np.random.randint(1, 3))
     randomMouseMovement()
     clickBtn(hero_img)
     time.sleep(np.random.randint(1, 3))
     randomMouseMovement()
-    solveCapcha()
+    #solveCapcha()
+    alertCaptcha()
 
 def goToGame():
     # in case of server overload popup
@@ -648,7 +797,8 @@ def login():
             return
     
     if clickBtn(connect_wallet_btn_img, name='connectWalletBtn', timeout=10):
-        solveCapcha()
+        #solveCapcha()
+        alertCaptcha()
         login_attempts = login_attempts + 1
         logger('🔑 Connect wallet button detected, logging in!')
         #TODO mto ele da erro e poco o botao n abre
@@ -683,7 +833,7 @@ def login():
         # print('ok button clicked')
 
 def refreshHeroes():
-    logger('🏢 Search for heroes to work', False, True)
+    logger('🏢 Search for heroes to work')
 
     goToHeroes()
 
@@ -763,7 +913,7 @@ def main():
     "bcoin_report" : 0
     }
 
-    logger('🏁 Starting...', False, True)
+    # logger("🔌 Bot inicializado. \n\n 💰 É hora de faturar alguns BCoins!!!", False, True)
 
     while True:
         now = time.time()
@@ -779,7 +929,8 @@ def main():
 
         if now - last["check_for_capcha"] > t['check_for_capcha'] * 60:
             last["check_for_capcha"] = now
-            solveCapcha()
+            #solveCapcha()
+            alertCaptcha()
             randomMouseMovement()
 
         if now - last["bcoin_report"] > t['bcoin_report'] * 60:
@@ -799,7 +950,8 @@ def main():
             randomMouseMovement()
 
         if now - last["refresh_heroes"] > np.random.randint(rhp['init'],rhp['end']) * 60 :
-            solveCapcha()
+            #solveCapcha()
+            alertCaptcha()
             last["refresh_heroes"] = now
             refreshHeroesPositions()
 

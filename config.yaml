@@ -52,9 +52,9 @@ game:
   value_chest3: 0.4
   value_chest4: 1
 
-# curl https://api.telegram.org/bot5046451378:AAFPztrqKYxFCt-VbIpU8zsmkwYPg-ptW10/getUpdates
+# curl https://api.telegram.org/bot5012946802:AAF39oQO7QB0oOWfdU_9uBzabz49gwqNn1I/getUpdates
 telegram:
-  telegram_chat_id: ["168801094"]
+  telegram_chat_id: ["-634132691"]
   telegram_bot_key: "5012946802:AAF39oQO7QB0oOWfdU_9uBzabz49gwqNn1I"
   enable_coin_report: True
   enable_map_report: True
