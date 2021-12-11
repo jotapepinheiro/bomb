@@ -20,7 +20,7 @@ import re
 
 img_src = r'number.png'
 img = Image.open(img_src)
-text = pytesseract.image_to_string(img)
+text = pytesseract.image_to_string(img, lang='BombFont')
 saldoApurado = re.sub("[^\d\.]", "", text)
 print(text)
 

@@ -7,6 +7,7 @@ from numpy.random.mtrand import beta
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from PIL import Image
+from CaptchaSolver import captcha_solver
 
 import pytesseract as ocr
 import numpy as np
@@ -15,6 +16,7 @@ import pyautogui
 import time
 import sys
 import re
+import os
 import telegram
 import yaml
 
@@ -302,9 +304,18 @@ def solveCapcha():
     # show(arr)
     #########################################
 
+def trataImgCaptcha(img_captcha_dir):
+
+    img = cv2.imread(img_captcha_dir)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img = cv2.medianBlur(img,5)
+    # letras brancas
+    imagem_tratada = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+    cv2.imwrite(img_captcha_dir, imagem_tratada)
+    time.sleep(1)
+    return Image.open(img_captcha_dir)
+
 def alertCaptcha():
-    global open_secound_account
-    
     current = printScreen()
     popup_pos = positions(robot, img=current)
 
@@ -313,18 +324,27 @@ def alertCaptcha():
         return "not-found"
 
     test = telegram_bot_sendtext(f'⚠️ ATENÇÃO! \n\n 🧩 RESOLVER CAPTCHA DO {d_telegram["telegram_user_name"]}')
-    logger('Captcha!')
-
+    logger('Captcha detectado!')
+    
     slider_start_pos = getSliderPosition()
     if slider_start_pos is None:
         logger('Posição do slider do captcha não encontrado')
-        return "fail"
+        return
 
+    #tentativa de ler o ocr
+    captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] - 50, popup_pos[0][1] + 140, popup_pos[0][2] - 50, popup_pos[0][3]*2))
+    img_captcha_dir = os.path.dirname(os.path.realpath(__file__)) + r'\targets\captcha1.png'
+    captcha_scshot.save(img_captcha_dir)
+    img = trataImgCaptcha(img_captcha_dir)
+
+    captchaValue = ocr.image_to_string(img, lang='BombFont')
+    captchaValue = re.sub("[^\d\.]", "", captchaValue)
+    
     slider_mov = 40
-    slider_size = positions(slider_size_1, threshold=0.9)
+    slider_size = positions(images['slider_size_1'], threshold=0.9)
 
     #obten o quanto de pixels o ponteiro tem que arrastar de acordo com o tamanho do slider que aparece
-    numero_sliders = 7 # o número de repetições é a quantidade de imagens do slider-size que tenho + 1
+    numero_sliders = 8 # o número de repetições é a quantidade de imagens do slider-size que tenho + 1
     for i in range(1, numero_sliders): 
         slider_size = positions(images[f'slider_size_{i}'], threshold=0.9)
         if(len(slider_size) > 0):
@@ -334,13 +354,18 @@ def alertCaptcha():
     
     if(len(slider_size) == 0):
         logger('Tamanho do slider do captcha não encontrado!')
-        return "fail"
+        return
 
     slider_positions = []
     x,y = slider_start_pos
+    cp = captcha_solver.CaptchaSolver()
+    trainingPyTorch = os.path.dirname(os.path.realpath(__file__)) + r'CaptchaSolver\bomb_captcha.pt'
+    cp.initModel(trainingPyTorch, 'CaptchaSolver')
+    cord_to_move = (0,0)
     for i in range(5):
         if i == 0:
-            pyautogui.moveTo(x, y, 1)
+            # pyautogui.moveTo(x, y, 1)
+            randomMouseMovement(False, x, y)
             pyautogui.mouseDown()
 
             #faz o primeiro movimento e volta para abrir o primeiro item
@@ -356,51 +381,66 @@ def alertCaptcha():
             slider_positions.append((x + slider_mov, y))
             pyautogui.moveTo(x + slider_mov, y, 0.15)
 
-        # time.sleep(0.5)
+        time.sleep(0.5)
         #encontra a posição do captcha inteiro
         captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] - 120, popup_pos[0][1] + 80, popup_pos[0][2]*1.9, popup_pos[0][3]*8.3))
-        img_captcha_dir = r'./logs/captcha.png'
+        img_captcha_dir = os.path.dirname(os.path.realpath(__file__)) + r'\targets\captcha1.png'
         captcha_scshot.save(img_captcha_dir)
 
-        #envia a foto do captcha
-        telegram_bot_sendtext(f'Imagem {d_telegram["telegram_user_name"]} /{i + 1}')
-        telegram_bot_sendphoto(img_captcha_dir)
+        
+        img = cv2.imread(img_captcha_dir)
+        time.sleep(0.5)
+        resultado = cp.SolveCaptcha(img, trainingPyTorch, 0.7, dir='CaptchaSolver')
 
-    telegram_bot_sendtext('Atenção clique duas vezes no número da posição desejada \n\r /Imagem_1\n\r /Imagem_2\n\r /Imagem_3\n\r /Imagem_4\n\r /Imagem_5')
-
-    TBotUpdater.stop()
-    time.sleep(1)
-
-    qtd_messages_sended = len(TBot.getUpdates())
-    user_response = 0
-    # await user to response
-    while True:
-        messages_now = TBot.getUpdates()
-        if len(messages_now) > qtd_messages_sended and messages_now[len(messages_now) -1].message.text.replace(d_telegram["telegram_bot_name"],'').replace('/Imagem_','').isdigit:
-            user_response = int(messages_now[len(messages_now) -1].message.text.replace(d_telegram["telegram_bot_name"],'').replace('/Imagem_',''))
+        if(resultado['Captcha'] == captchaValue):
+            pyautogui.moveTo(slider_positions[-1][0] + 4, slider_positions[-1][1] + 3, 0.5)
+            pyautogui.mouseUp()
             break
-            
-        time.sleep(4)
 
-    if(user_response == 0):
-        user_response = np.random.randint(1, 5)
-        logger(f"Sem resposta do usuário! Gerou o numero {user_response}")
+        logger(f'Valor do captcha {captchaValue}, valor da imagem {resultado["Captcha"]} ')
 
-    logger(f"usuario escolheu o numero {user_response}")
 
-    pyautogui.moveTo(slider_positions[user_response-1][0], slider_positions[user_response-1][1], 0.5)
-    pyautogui.moveTo(slider_positions[user_response-1][0] + 4, slider_positions[user_response-1][1] + 3, 0.5)
-    # time.sleep(0.5)
-    pyautogui.mouseUp()
+        #envia a foto do captcha
+        # telegram_bot_sendtext(f'Imagem /{i + 1}')
+        # telegram_bot_sendphoto(img_captcha_dir)
 
-    time.sleep(2)
+    # TBotUpdater.stop()
+    # time.sleep(1)
+
+    #logger('Esperando pela resposta do usuário...')
+    #    qtd_messages_sended = len(bot.getUpdates())
+    #    user_response = 0
+    #    # await user to response
+    #    try:
+    #        while True:
+    #            messages_now = bot.getUpdates()
+    #            if len(messages_now) > qtd_messages_sended and messages_now[len(messages_now) -1].message.text.replace('/','').isdigit:
+    #                user_response = int(messages_now[len(messages_now) -1].message.text.replace('/',''))
+    #                break
+    #                
+    #            time.sleep(4)
+    #    except:
+    #        logger('Sem resposta do usuário!')
+    #
+    #    if(user_response == 0):
+    #        logger('Sem resposta do usuário!')
+    #        return
+    #
+    #    logger(f"usuario escolheu o numero {user_response}")
+    #
+    #    pyautogui.moveTo(slider_positions[user_response-1][0], slider_positions[user_response-1][1], 0.5)
+    #    pyautogui.moveTo(slider_positions[user_response-1][0] + 4, slider_positions[user_response-1][1] + 3, 0.5)
+    #    # time.sleep(0.5)
+    #    pyautogui.mouseUp()
+
+    #TBotUpdater.start_polling()
+    #time.sleep(2)
+
     if(len(positions(robot)) == 0):
         telegram_bot_sendtext('Resolvido')
     else:
         telegram_bot_sendtext('Falhou')
-    
-    TBotUpdater.start_polling()
-
+ 
 def dateFormatted(format = '%Y-%m-%d %H:%M:%S'):
     datetime = time.localtime()
     formatted = time.strftime(format, datetime)
