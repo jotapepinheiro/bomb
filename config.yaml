@@ -54,10 +54,12 @@ game:
 
 # curl https://api.telegram.org/bot5068209703:AAHDpDfwby8rvKS04BGAB05uFR_q8NI5OeU/getUpdates
 telegram:
-  telegram_chat_id: ["-634132691"]
+  telegram_mode: True
+  telegram_chat_id: ["168801094"] #"-634132691"
   telegram_bot_key: "5012946802:AAF39oQO7QB0oOWfdU_9uBzabz49gwqNn1I"
   telegram_bot_name: "@BombJoaoBot"
   telegram_user_name: "JOÃO"
+  format_of_images: "jpg"
   enable_coin_report: True
   enable_map_report: True
 

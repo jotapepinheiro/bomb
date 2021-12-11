@@ -3,7 +3,12 @@
 
 from cv2 import cv2
 from os import listdir
+from numpy.random.mtrand import beta
+from telegram import Update
+from telegram.ext import Updater, CommandHandler, CallbackContext
+from PIL import Image
 
+import pytesseract as ocr
 import numpy as np
 import mss
 import pyautogui
@@ -11,36 +16,36 @@ import time
 import sys
 import re
 import telegram
-
 import yaml
 
-import pytesseract as ocr
-from PIL import Image
-
-if __name__ == '__main__':
-    stream = open("config.yaml", 'r')
+stream = open("config.yaml", 'r')
+if stream is not None:
     c = yaml.safe_load(stream)
+    t = c['time_intervals']
+    ct = c['threshold']
+    d_game = c['game']
+    d_telegram = c['telegram']
 
-t = c['time_intervals']
-ct = c['threshold']
-d_game = c['game']
-d_telegram = c['telegram']
-
-shw = t['send_heroes_for_work']
-rhp = t['refresh_heroes_positions']
-cnm = t['check_for_new_map_button']
-cfl = t['check_for_login']
-ibm = t['interval_between_moviments']
+    shw = t['send_heroes_for_work']
+    rhp = t['refresh_heroes_positions']
+    cnm = t['check_for_new_map_button']
+    cfl = t['check_for_login']
+    ibm = t['interval_between_moviments']
+    stream.close()
+else:
+    print('Config file not found, exiting')
+    time.sleep(3)
+    exit()
 
 if not c['usage_multi_account']:
-    print('>>---> Mult Account not enabled')
-print('\n')
+    print('Mult Account not enabled')
 
 # Initialize telegram
 try:
-    bot = telegram.Bot(token=d_telegram["telegram_bot_key"])
+    TBot = telegram.Bot(token=d_telegram["telegram_bot_key"])
+    TBotUpdater = Updater(d_telegram["telegram_bot_key"])
 except:
-    print(">>--->Bot not initialized! See configuration file.\n")
+    print("Bot not initialized! See configuration file.")
 
 pyautogui.PAUSE = np.random.randint(ibm['init'],ibm['end'])
 
@@ -115,7 +120,6 @@ def load_images():
 
 images = load_images()
 
-###################### puzzle #############
 def findPuzzlePieces(result, piece_img, threshold=0.5):
     piece_w = piece_img.shape[1]
     piece_h = piece_img.shape[0]
@@ -189,7 +193,7 @@ def getPiecesPosition(t=150):
     y = ry + y_offset
     x = rx + x_offset
 
-    img = printSreen()
+    img = printScreen()
 
     cropped = img[ y : y + h , x: x + w]
     blurred = cv2.GaussianBlur(cropped, (3, 3), 0)
@@ -300,8 +304,8 @@ def solveCapcha():
 
 def alertCaptcha():
     global open_secound_account
-
-    current = printSreen()
+    
+    current = printScreen()
     popup_pos = positions(robot, img=current)
 
     if len(popup_pos) == 0:
@@ -311,14 +315,12 @@ def alertCaptcha():
     test = telegram_bot_sendtext(f'⚠️ ATENÇÃO! \n\n 🧩 RESOLVER CAPTCHA DO {d_telegram["telegram_user_name"]}')
     logger('Captcha!')
 
-    #linha para testes
-
     slider_start_pos = getSliderPosition()
     if slider_start_pos is None:
         logger('Posição do slider do captcha não encontrado')
         return "fail"
 
-    slider_mov = 35
+    slider_mov = 40
     slider_size = positions(slider_size_1, threshold=0.9)
 
     #obten o quanto de pixels o ponteiro tem que arrastar de acordo com o tamanho do slider que aparece
@@ -364,21 +366,24 @@ def alertCaptcha():
         telegram_bot_sendtext(f'Imagem {d_telegram["telegram_user_name"]} /{i + 1}')
         telegram_bot_sendphoto(img_captcha_dir)
 
-    telegram_bot_sendtext('Atenção responda apenas com o número da posição desejada \n\r (/1)\n\r (/2)\n\r (/3)\n\r (/4)\n\r (/5)')
+    telegram_bot_sendtext('Atenção clique duas vezes no número da posição desejada \n\r /Imagem_1\n\r /Imagem_2\n\r /Imagem_3\n\r /Imagem_4\n\r /Imagem_5')
 
-    qtd_messages_sended = len(bot.getUpdates())
+    TBotUpdater.stop()
+    time.sleep(1)
+
+    qtd_messages_sended = len(TBot.getUpdates())
     user_response = 0
     # await user to response
     while True:
-        messages_now = bot.getUpdates()
-        if len(messages_now) > qtd_messages_sended and messages_now[len(messages_now) -1].message.text.replace(d_telegram["telegram_bot_name"],'').replace('/','').isdigit:
-            user_response = int(messages_now[len(messages_now) -1].message.text.replace(d_telegram["telegram_bot_name"],'').replace('/',''))
+        messages_now = TBot.getUpdates()
+        if len(messages_now) > qtd_messages_sended and messages_now[len(messages_now) -1].message.text.replace(d_telegram["telegram_bot_name"],'').replace('/Imagem_','').isdigit:
+            user_response = int(messages_now[len(messages_now) -1].message.text.replace(d_telegram["telegram_bot_name"],'').replace('/Imagem_',''))
             break
             
         time.sleep(4)
 
     if(user_response == 0):
-        user_response = np.random.randint(1, 4)
+        user_response = np.random.randint(1, 5)
         logger(f"Sem resposta do usuário! Gerou o numero {user_response}")
 
     logger(f"usuario escolheu o numero {user_response}")
@@ -393,13 +398,15 @@ def alertCaptcha():
         telegram_bot_sendtext('Resolvido')
     else:
         telegram_bot_sendtext('Falhou')
+    
+    TBotUpdater.start_polling()
 
 def dateFormatted(format = '%Y-%m-%d %H:%M:%S'):
     datetime = time.localtime()
     formatted = time.strftime(format, datetime)
     return formatted
 
-def logger(message, progress_indicator = False, telegram = False, color = 'default'):
+def logger(message, progress_indicator=False, telegram=False, color='default'):
     global last_log_is_progress
 
     color_formatted = COLOR.get(color.lower(), COLOR['default'])
@@ -443,6 +450,47 @@ def logger(message, progress_indicator = False, telegram = False, color = 'defau
 
     return True
 
+# Initialize telegram
+if d_telegram['telegram_mode'] == True:
+    logger('Initializing Telegram...')
+    try:
+        def send_print(update: Update, context: CallbackContext) -> None:
+            update.message.reply_text('🔃 Proccessing...')
+            screenshot = printScreen()
+            cv2.imwrite('./logs/print-report.%s' % d_telegram["format_of_images"], screenshot)
+            update.message.reply_photo(photo=open('./logs/print-report.%s' % d_telegram["format_of_images"], 'rb'))
+
+        def send_id(update: Update, context: CallbackContext) -> None:
+            update.message.reply_text(f'🆔 Your id is: {update.effective_user.id}')
+
+        def send_map(update: Update, context: CallbackContext) -> None:
+            update.message.reply_text('🔃 Proccessing...')
+            if sendMapReport() is None:
+                update.message.reply_text('😿 An error has occurred')
+
+        def send_bcoin(update: Update, context: CallbackContext) -> None:
+            update.message.reply_text('🔃 Proccessing...')
+            if sendBCoinReport() is None:
+                update.message.reply_text('😿 An error has occurred')
+                clickBtn(x_button_img)
+
+        commands = [
+            ['print', send_print],
+            ['id', send_id],
+            ['map', send_map],
+            ['bcoin', send_bcoin]
+        ]
+
+        for command in commands:
+            TBotUpdater.dispatcher.add_handler(CommandHandler(command[0], command[1]))
+
+        TBotUpdater.start_polling()
+
+        # TBotUpdater.idle()
+    except:
+        logger('Bot not initialized, see configuration file')
+    
+
 # Send MAP report to telegram
 def sendMapReport():
     if(len(d_telegram["telegram_chat_id"]) <= 0 or d_telegram["enable_map_report"] is False):
@@ -457,7 +505,7 @@ def sendMapReport():
 
     rx, ry, _, _ = back[0]
 
-    sct_img = printSreen()
+    sct_img = printScreen()
 
     w = 962
     h = 603
@@ -489,7 +537,7 @@ def telegram_bot_sendphoto(photo_path):
     try:
         if(len(d_telegram["telegram_chat_id"]) > 0):
             for chat_id in d_telegram["telegram_chat_id"]:
-                return bot.send_photo(chat_id=chat_id, photo=open(photo_path, 'rb'))
+                return TBot.send_photo(chat_id=chat_id, photo=open(photo_path, 'rb'))
     except:
         logger("⛔ Unable to send telegram message. See configuration file.")
 
@@ -498,7 +546,7 @@ def telegram_bot_sendtext(bot_message):
     try:
         if(len(d_telegram["telegram_chat_id"]) > 0):
             for chat_id in d_telegram["telegram_chat_id"]:
-                return bot.send_message(chat_id=chat_id, text=bot_message)
+                return TBot.send_message(chat_id=chat_id, text=bot_message)
     except:
         logger("⛔ Unable to send telegram message. See configuration file.")
 
@@ -547,7 +595,7 @@ def sendBCoinReport():
 
     rx, ry, _, _ = coin[0]
 
-    sct_img = printSreen()
+    sct_img = printScreen()
 
     w = 220
     h = 240
@@ -601,7 +649,7 @@ def clickBtn(img, name=None, timeout=3, threshold=ct['default']):
         pyautogui.doubleClick()
         return True
 
-def printSreen():
+def printScreen():
     global open_secound_account
 
     with mss.mss() as sct:
@@ -626,7 +674,7 @@ def printSreen():
 
 def positions(target, threshold=ct['default'], img=None):
     if img is None:
-        img = printSreen()
+        img = printScreen()
 
     result = cv2.matchTemplate(img,target,cv2.TM_CCOEFF_NORMED)
     w = target.shape[1]
@@ -683,7 +731,7 @@ def isWorking(bar, buttons):
     return True
 
 def clickGreenBarButtons():
-    # ele clicka nos q tao trabaiano mas axo q n importa
+    # ele tambem clica nos que estao trabalhando
     offset = 130
     green_bars = positions(green_bar, threshold=ct['green_bar'])
     logger('🟩 %d green bars detected' % len(green_bars))
@@ -905,7 +953,7 @@ def randomMouseMovement(v_rand=True, x=c['screen_width'], y=c['screen_height']):
     pyautogui.moveTo(rx, ry, np.random.randint(1,2), choice)
     pyautogui.FAILSAFE = True
 
-def main():
+def main() -> None:
     time.sleep(5)
     t = c['time_intervals']
     global open_secound_account
@@ -969,17 +1017,10 @@ def main():
 
         time.sleep(np.random.randint(5,10))
 
-main()
-
-#cv2.imshow('img',sct_img)
-#cv2.waitKey()
-
-# chacar se tem o sign antes de aperta o connect wallet ?
-# arrumar aquela parte do codigo copiado onde tem q checar o sign 2 vezes ?
-# colocar o botao em pt
-# melhorar o log
-# salvar timestamp dos clickes em newmap em um arquivo
-# soh resetar posiçoes se n tiver clickado em newmap em x segundos
-
-# pegar o offset dinamicamente
-# clickar so no q nao tao trabalhando pra evitar um loop infinito no final do scroll se ainda tiver um verdinho
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        logger('😓 Shutting down the bot', False, True)
+        TBotUpdater.stop()
+        exit()
