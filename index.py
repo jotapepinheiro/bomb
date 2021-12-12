@@ -256,8 +256,6 @@ def saveCaptchaSolution(img, pos):
     #TODO tirar um poco de cima
 
 def solveCapcha():
-    global open_secound_account
-
     logger('🧩 Verificando captcha')
     pieces_start_pos = getPiecesPosition()
     if pieces_start_pos is None :
@@ -322,7 +320,6 @@ def trataImgCaptcha(img_captcha_dir):
     return Image.open(img_captcha_dir)
 
 def getAccount():
-    global open_secound_account
     if (open_secound_account and c['usage_multi_account']):
         return "CONTA 2"
     else:
@@ -552,7 +549,6 @@ if d_telegram['telegram_mode'] == True:
                 account = getAccount()
                 update.message.reply_text(f'🆎 Conta alterada para: {account}')
                 login()
-                randomMouseMovement()
             else:
                 update.message.reply_text(f'🆎 Conta não alterada')
 
@@ -701,8 +697,6 @@ def sendBCoinReport():
     logger(f'💰 Relatório BCoin enviado. {d_telegram["telegram_user_name"]}', False, True)
 
 def clickBtn(img, name=None, timeout=3, threshold=ct['default']):
-    global open_secound_account
-
     logger(None, progress_indicator=True)
     if not name is None:
         pass
@@ -733,8 +727,6 @@ def clickBtn(img, name=None, timeout=3, threshold=ct['default']):
         return True
 
 def printScreen():
-    global open_secound_account
-
     with mss.mss() as sct:
         # The screen part to capture
         # monitor = sct.monitors[0]
@@ -924,6 +916,7 @@ def refreshHeroesPositions():
     randomMouseMovement()
 
 def refreshBrowser():
+    logger('🔃 Atualizando o navegador')
     if (open_secound_account and c['usage_multi_account']):
         randomMouseMovement(False, c['screen_width']+(c['screen_width']/2), c['screen_height']/2)
     else:
@@ -1054,7 +1047,6 @@ def randomMouseMovement(v_rand=True, x=c['screen_width'], y=c['screen_height']):
 def main() -> None:
     time.sleep(5)
     t = c['time_intervals']
-    global open_secound_account
 
     last = {
     "login" : 0,
@@ -1074,6 +1066,7 @@ def main() -> None:
             sys.stdout.flush()
             last["login"] = now
             if c['usage_multi_account']:
+                global open_secound_account
                 open_secound_account = not open_secound_account
                 account = getAccount()
                 logger('🆎 Conta alterada para {}'.format(account))
