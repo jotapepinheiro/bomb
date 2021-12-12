@@ -462,10 +462,10 @@ def alertCaptcha():
     #time.sleep(2)
 
     if(len(positions(robot)) == 0):
-        telegram_bot_sendtext('✅ Resolvido')
+        telegram_bot_sendtext('✅ RESOLVIDO!')
     else:
         refreshBrowser()
-        telegram_bot_sendtext('🆘 Falhou')
+        telegram_bot_sendtext('🆘 FALHOU!')
  
 def dateFormatted(format = '%Y-%m-%d %H:%M:%S'):
     datetime = time.localtime()
