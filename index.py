@@ -4,7 +4,7 @@
 from cv2 import cv2
 from os import listdir
 from numpy.random.mtrand import beta
-from telegram import Update
+from telegram import Update, message
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from PIL import Image
 from CaptchaSolver import captcha_solver
@@ -35,19 +35,19 @@ if stream is not None:
     ibm = t['interval_between_moviments']
     stream.close()
 else:
-    print('Config file not found, exiting')
+    print('Arquivo de configuração não encontrado, saindo...')
     time.sleep(3)
     exit()
 
 if not c['usage_multi_account']:
-    print('Mult Account not enabled')
+    print('Conta múltipla não habilitada')
 
 # Initialize telegram
 try:
     TBot = telegram.Bot(token=d_telegram["telegram_bot_key"])
     TBotUpdater = Updater(d_telegram["telegram_bot_key"])
 except:
-    print("Bot not initialized! See configuration file.")
+    print("Bot não inicializado! Veja o arquivo de configuração.")
 
 pyautogui.PAUSE = np.random.randint(ibm['init'],ibm['end'])
 
@@ -105,6 +105,7 @@ slider_size_3 = cv2.imread('targets/slider_size_3.png')
 slider_size_4 = cv2.imread('targets/slider_size_4.png')
 slider_size_5 = cv2.imread('targets/slider_size_5.png')
 slider_size_6 = cv2.imread('targets/slider_size_6.png')
+slider_size_7 = cv2.imread('targets/slider_size_7.png')
 
 def remove_suffix(input_string, suffix):
     if suffix and input_string.endswith(suffix):
@@ -252,7 +253,7 @@ def saveCaptchaSolution(img, pos):
 def solveCapcha():
     global open_secound_account
 
-    logger('🧩 Checking for captcha')
+    logger('🧩 Verificando captcha')
     pieces_start_pos = getPiecesPosition()
     if pieces_start_pos is None :
         return "not-found"
@@ -454,9 +455,9 @@ def logger(message, progress_indicator=False, telegram=False, color='default'):
     formatted_datetime = dateFormatted()
 
     if (open_secound_account and c['usage_multi_account']):
-        account = "Account 2"
+        account = "Conta 2"
     else:
-        account = "Account 1"
+        account = "Conta 1"
 
     formatted_message = "{} - [{}] \n => {} \n".format(account, formatted_datetime, message)
     formatted_message_colored  = color_formatted + formatted_message + '\033[0m'
@@ -465,7 +466,7 @@ def logger(message, progress_indicator=False, telegram=False, color='default'):
     if progress_indicator:
         if not last_log_is_progress:
             last_log_is_progress = True
-            formatted_message = color_formatted + "{} - [{}] \n => {} \n".format(account, formatted_datetime, '⬆️  Processing last action..')
+            formatted_message = color_formatted + "{} - [{}] \n => {} \n".format(account, formatted_datetime, '⬆️  Processando a última ação..')
             sys.stdout.write(formatted_message)
             sys.stdout.flush()
         else:
@@ -492,33 +493,38 @@ def logger(message, progress_indicator=False, telegram=False, color='default'):
 
 # Initialize telegram
 if d_telegram['telegram_mode'] == True:
-    logger('Initializing Telegram...')
+    logger('Inicializando Telegram...')
     try:
         def send_print(update: Update, context: CallbackContext) -> None:
-            update.message.reply_text('🔃 Proccessing...')
+            update.message.reply_text('🔃 Processando...')
             screenshot = printScreen()
             cv2.imwrite('./logs/print-report.%s' % d_telegram["format_of_images"], screenshot)
             update.message.reply_photo(photo=open('./logs/print-report.%s' % d_telegram["format_of_images"], 'rb'))
 
         def send_id(update: Update, context: CallbackContext) -> None:
-            update.message.reply_text(f'🆔 Your id is: {update.effective_user.id}')
+            update.message.reply_text(f'🆔 Seu ID é: {update.effective_user.id}')
 
         def send_map(update: Update, context: CallbackContext) -> None:
-            update.message.reply_text('🔃 Proccessing...')
+            update.message.reply_text('🔃 Processando...')
             if sendMapReport() is None:
-                update.message.reply_text('😿 An error has occurred')
+                update.message.reply_text('😿 Ocorreu um erro')
 
         def send_bcoin(update: Update, context: CallbackContext) -> None:
-            update.message.reply_text('🔃 Proccessing...')
+            update.message.reply_text('🔃 Processando...')
             if sendBCoinReport() is None:
-                update.message.reply_text('😿 An error has occurred')
+                update.message.reply_text('😿 Ocorreu um erro')
                 clickBtn(x_button_img)
+
+        def send_help(update: Update, context: CallbackContext) -> None:
+            tMessage = "Comandos disponiveis...\n\n /print\n\n /map\n\n /bcoin\n\n /id\n"
+            update.message.reply_text(tMessage)
 
         commands = [
             ['print', send_print],
             ['id', send_id],
             ['map', send_map],
-            ['bcoin', send_bcoin]
+            ['bcoin', send_bcoin],
+            ['help', send_help]
         ]
 
         for command in commands:
@@ -528,9 +534,8 @@ if d_telegram['telegram_mode'] == True:
 
         # TBotUpdater.idle()
     except:
-        logger('Bot not initialized, see configuration file')
+        logger('O bot não foi inicializado, consulte o arquivo de configuração')
     
-
 # Send MAP report to telegram
 def sendMapReport():
     if(len(d_telegram["telegram_chat_id"]) <= 0 or d_telegram["enable_map_report"] is False):
@@ -579,7 +584,7 @@ def telegram_bot_sendphoto(photo_path):
             for chat_id in d_telegram["telegram_chat_id"]:
                 return TBot.send_photo(chat_id=chat_id, photo=open(photo_path, 'rb'))
     except:
-        logger("⛔ Unable to send telegram message. See configuration file.")
+        logger("⛔ Incapaz de enviar mensagem de telegrama. Veja o arquivo de configuração.")
 
 # Send telegram message text
 def telegram_bot_sendtext(bot_message):
@@ -588,7 +593,7 @@ def telegram_bot_sendtext(bot_message):
             for chat_id in d_telegram["telegram_chat_id"]:
                 return TBot.send_message(chat_id=chat_id, text=bot_message)
     except:
-        logger("⛔ Unable to send telegram message. See configuration file.")
+        logger("⛔ Incapaz de enviar mensagem de telegrama. Veja o arquivo de configuração.")
 
 # Count all chests in the map and calculate a value in BCoins.
 def sendPossibleAmountReport(baseImage):
@@ -606,13 +611,13 @@ def sendPossibleAmountReport(baseImage):
     total = value1 + value2 + value3 + value4
 
     report = """
-Possible quantity chest per type:
+Quantidade possível de baú por tipo:
 🟤  ==> """+str(c1)+"""
 🟣  ==> """+str(c2)+"""
 🟡  ==> """+str(c3)+"""
 🔵  ==> """+str(c4)+"""
 🏛  ==> """+str(c5)+"""
-Possible amount : 💣 """+f'{total:.3f} bcoin'+"""
+Quantidade possível : 💣 """+f'{total:.3f} bcoin'+"""
 """
     logger(report, False, True)
 
@@ -756,7 +761,7 @@ def clickButtons():
         hero_clicks = hero_clicks + 1
         #cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
         if hero_clicks > 20:
-            logger('⛔ Too many hero clicks, try to increase the go_to_work_btn threshold')
+            logger('⛔ Muitos cliques nos heróis, tente aumentar o limite go_to_work_btn')
             return
     return len(buttons)
 
@@ -774,17 +779,17 @@ def clickGreenBarButtons():
     # ele tambem clica nos que estao trabalhando
     offset = 130
     green_bars = positions(green_bar, threshold=ct['green_bar'])
-    logger('🟩 %d green bars detected' % len(green_bars))
+    logger('🟩 %d barras verdes detectadas' % len(green_bars))
     buttons = positions(go_work_img, threshold=ct['go_to_work_btn'])
-    logger('🆗 %d buttons detected' % len(buttons))
+    logger('🆗 %d botões detectados' % len(buttons))
 
     not_working_green_bars = []
     for bar in green_bars:
         if not isWorking(bar, buttons):
             not_working_green_bars.append(bar)
     if len(not_working_green_bars) > 0:
-        logger('🆗 %d buttons with green bar detected' % len(not_working_green_bars))
-        logger('👆 Clicking in %d heroes.' % len(not_working_green_bars))
+        logger('🆗 %d botões com barra verde detectados' % len(not_working_green_bars))
+        logger('👆 Clicando em %d heróis.' % len(not_working_green_bars))
 
     # se tiver botao com y maior que bar y-10 e menor que y+10
     for (x, y, w, h) in not_working_green_bars:
@@ -794,7 +799,7 @@ def clickGreenBarButtons():
         global hero_clicks
         hero_clicks = hero_clicks + 1
         if hero_clicks > 20:
-            logger('⛔ Too many hero clicks, try to increase the go_to_work_btn threshold')
+            logger('⛔ Muitos cliques nos heróis, tente aumentar o limite go_to_work_btn')
             return
         #cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
     return len(not_working_green_bars)
@@ -810,7 +815,7 @@ def clickFullBarButtons():
             not_working_full_bars.append(bar)
 
     if len(not_working_full_bars) > 0:
-        logger('👆 Clicking in %d heroes.' % len(not_working_full_bars))
+        logger('👆 Clicando em %d heróis.' % len(not_working_full_bars))
 
     for (x, y, w, h) in not_working_full_bars:
         randomMouseMovement(False, x+offset+(w/2), y+(h/2))
@@ -823,7 +828,7 @@ def clickFullBarButtons():
 def loggerMapClicked():
     global new_map_clicks
     new_map_clicks = new_map_clicks + 1
-    logger('🗺️ {} - New Map button clicked!'.format(new_map_clicks), False, True)
+    logger('🗺️ {} - Botão Novo mapa clicado!'.format(new_map_clicks), False, True)
     logger_file = open("./logs/new-map.log", "a", encoding='utf-8')
     logger_file.write(dateFormatted() + '\n')
     logger_file.close()
@@ -860,7 +865,7 @@ def goToGame():
     clickBtn(teasureHunt_icon_img)
 
 def refreshHeroesPositions():
-    logger('🔃 Refreshing Heroes Positions')
+    logger('🔃 Refrescando as posições dos heróis')
     clickBtn(arrow_img)
     clickBtn(teasureHunt_icon_img)
     randomMouseMovement()
@@ -870,10 +875,10 @@ def refreshHeroesPositions():
 
 def login():
     global login_attempts
-    logger('😿 Checking if game has disconnected')
+    logger('😿 Verificando se o jogo foi desconectado')
 
     if login_attempts > 3:
-        logger('🔃 Too many login attempts, refreshing.')
+        logger('🔃 Muitas tentativas de login, atualizando.')
         login_attempts = 0
         
         if (open_secound_account and c['usage_multi_account']):
@@ -892,7 +897,7 @@ def login():
         #solveCapcha()
         alertCaptcha()
         login_attempts = login_attempts + 1
-        logger('🔑 Connect wallet button detected, logging in!')
+        logger('🔑 Botão conectar carteira detectado, fazendo login!')
         #TODO mto ele da erro e poco o botao n abre
         # time.sleep(10)
 
@@ -925,16 +930,16 @@ def login():
         # print('ok button clicked')
 
 def refreshHeroes():
-    logger('🏢 Search for heroes to work')
+    logger('🏢 Procurar por heróis para trabalhar')
 
     goToHeroes()
 
     if c['select_heroes_mode'] == "full":
-        logger("⚒️ Sending heroes with full stamina bar to work!", 'green')
+        logger("⚒️ Enviando heróis com barra de resistência completa para o trabalho!", 'green')
     elif c['select_heroes_mode'] == "green":
-        logger("⚒️ Sending heroes with green stamina bar to work!", 'green')
+        logger("⚒️ Enviando heróis com barra de resistência verde para o trabalho!", 'green')
     else:
-        logger("⚒️ Sending all heroes to work!", 'green')
+        logger("⚒️ Enviando todos os heróis para o trabalho!", 'green')
 
     buttonsClicked = 1
     empty_scrolls_attempts = c['scroll_attemps']
@@ -951,7 +956,7 @@ def refreshHeroes():
             empty_scrolls_attempts = empty_scrolls_attempts - 1
         scroll()
         time.sleep(np.random.randint(1, 3))
-    logger('💪 {} heroes sent to work'.format(hero_clicks))
+    logger('💪 {} heróis enviados para o trabalho'.format(hero_clicks))
     goToGame()
 
 def getRandonPixels(range=10):
@@ -1007,7 +1012,7 @@ def main() -> None:
     "bcoin_report" : 0
     }
 
-    # logger("🔌 Bot inicializado. \n\n 💰 É hora de faturar alguns BCoins!!!", False, True)
+    logger("🔌 Bot inicializado. \n\n 💰 É hora de faturar alguns BCoins!!!")
 
     while True:
         now = time.time()
@@ -1017,7 +1022,7 @@ def main() -> None:
             last["login"] = now
             if c['usage_multi_account']:
                 open_secound_account = not open_secound_account
-                logger('🆎 Secound Account Positions {}'.format(open_secound_account))
+                logger('🆎 Posições de conta secundária {}'.format(open_secound_account))
             login()
             randomMouseMovement()
 
@@ -1061,6 +1066,6 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        logger('😓 Shutting down the bot', False, True)
+        logger('😓 Desligando o bot', False, True)
         TBotUpdater.stop()
         exit()
