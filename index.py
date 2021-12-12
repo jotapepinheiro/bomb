@@ -332,7 +332,12 @@ def alertCaptcha():
         logger('Captcha box não encontrado')
         return "not-found"
 
-    test = telegram_bot_sendtext(f'⚠️ ATENÇÃO! \n\n 🧩 RESOLVER CAPTCHA DO {d_telegram["telegram_user_name"]}')
+    if (open_secound_account and c['usage_multi_account']):
+        account = "CONTA 2"
+    else:
+        account = "CONTA 1"
+
+    test = telegram_bot_sendtext(f'⚠️ ATENÇÃO! RESOLVER CAPTCHA...\n\n 🧩 {account} DO {d_telegram["telegram_user_name"]}')
     logger('Captcha detectado!')
     
     slider_start_pos = getSliderPosition()
