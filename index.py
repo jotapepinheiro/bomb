@@ -661,8 +661,6 @@ def sendBCoinReport():
     if(len(d_telegram["telegram_chat_id"]) <= 0 or d_telegram["enable_coin_report"] is False):
         return
 
-    sct_img = printScreen()
-
     try:
         clickBtn(treasure_chest_button)
     except:
@@ -684,6 +682,8 @@ def sendBCoinReport():
 
     y = ry + y_offset
     x = rx + x_offset
+
+    sct_img = printScreen()
 
     crop_img = sct_img[ y : y + h , x: x + w]
 
@@ -1046,6 +1046,7 @@ def randomMouseMovement(v_rand=True, x=c['screen_width'], y=c['screen_height']):
     pyautogui.FAILSAFE = True
 
 def main() -> None:
+    global open_secound_account
     time.sleep(5)
     t = c['time_intervals']
 
@@ -1067,7 +1068,6 @@ def main() -> None:
             sys.stdout.flush()
             last["login"] = now
             if c['usage_multi_account']:
-                global open_secound_account
                 open_secound_account = not open_secound_account
                 account = getAccount()
                 logger('🆎 Conta alterada para {}'.format(account))
