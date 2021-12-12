@@ -549,6 +549,7 @@ if d_telegram['telegram_mode'] == True:
                 account = getAccount()
                 update.message.reply_text(f'🆎 Conta alterada para: {account}')
                 login()
+                refreshHeroes()
             else:
                 update.message.reply_text(f'🆎 Conta não alterada')
 
