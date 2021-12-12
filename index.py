@@ -459,6 +459,7 @@ def alertCaptcha():
     if(len(positions(robot)) == 0):
         telegram_bot_sendtext('Resolvido')
     else:
+        refreshBrowser()
         telegram_bot_sendtext('Falhou')
  
 def dateFormatted(format = '%Y-%m-%d %H:%M:%S'):
@@ -904,6 +905,19 @@ def refreshHeroesPositions():
     clickBtn(teasureHunt_icon_img)
     randomMouseMovement()
 
+def refreshBrowser():
+    if (open_secound_account and c['usage_multi_account']):
+        randomMouseMovement(False, c['screen_width']+(c['screen_width']/2), c['screen_height']/2)
+    else:
+        randomMouseMovement(False, c['screen_width']/2, c['screen_height']/2)
+
+    if(c['is_macos']):
+        pyautogui.hotkey('command','r')
+        return
+    else:
+        pyautogui.hotkey('ctrl','f5')
+        return
+
 def login():
     global login_attempts
     logger('😿 Verificando se o jogo foi desconectado')
@@ -912,17 +926,7 @@ def login():
         logger('🔃 Muitas tentativas de login, atualizando.')
         login_attempts = 0
         
-        if (open_secound_account and c['usage_multi_account']):
-            randomMouseMovement(False, c['screen_width']+(c['screen_width']/2), c['screen_height']/2)
-        else:
-            randomMouseMovement(False, c['screen_width']/2, c['screen_height']/2)
-
-        if(c['is_macos']):
-            pyautogui.hotkey('command','r')
-            return
-        else:
-            pyautogui.hotkey('ctrl','f5')
-            return
+        refreshBrowser()
     
     if clickBtn(connect_wallet_btn_img, name='connectWalletBtn', timeout=10):
         #solveCapcha()
