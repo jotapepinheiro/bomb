@@ -543,13 +543,13 @@ if d_telegram['telegram_mode'] == True:
             update.message.reply_text(tMessage)
 
         def alter_account(update: Update, context: CallbackContext) -> None:
-            global open_secound_account
             if c['usage_multi_account']:
+                global open_secound_account
                 open_secound_account = not open_secound_account
                 account = getAccount()
                 update.message.reply_text(f'🆎 Conta alterada para: {account}')
-                login()
-                refreshHeroes()
+                if refreshHeroes() is None:
+                    update.message.reply_text('😿 Ocorreu um erro')
             else:
                 update.message.reply_text(f'🆎 Conta não alterada')
 
@@ -661,6 +661,8 @@ def sendBCoinReport():
     if(len(d_telegram["telegram_chat_id"]) <= 0 or d_telegram["enable_coin_report"] is False):
         return
 
+    sct_img = printScreen()
+
     try:
         clickBtn(treasure_chest_button)
     except:
@@ -674,8 +676,6 @@ def sendBCoinReport():
         return
 
     rx, ry, _, _ = coin[0]
-
-    sct_img = printScreen()
 
     w = 220
     h = 240
