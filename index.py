@@ -321,6 +321,13 @@ def trataImgCaptcha(img_captcha_dir):
     time.sleep(1)
     return Image.open(img_captcha_dir)
 
+def getAccount():
+    global open_secound_account
+    if (open_secound_account and c['usage_multi_account']):
+        return "CONTA 2"
+    else:
+        return "CONTA 1"
+        
 def alertCaptcha():
     current = printScreen()
     popup_pos = positions(robot, threshold=ct['default'], img=current)
@@ -332,10 +339,7 @@ def alertCaptcha():
         logger('Captcha box não encontrado')
         return "not-found"
 
-    if (open_secound_account and c['usage_multi_account']):
-        account = "CONTA 2"
-    else:
-        account = "CONTA 1"
+    account = getAccount()
 
     test = telegram_bot_sendtext(f'⚠️ ATENÇÃO! RESOLVER CAPTCHA...\n\n 🧩 {account} DO {d_telegram["telegram_user_name"]}')
     logger('Captcha detectado!')
@@ -479,10 +483,7 @@ def logger(message, progress_indicator=False, telegram=False, color='default'):
 
     formatted_datetime = dateFormatted()
 
-    if (open_secound_account and c['usage_multi_account']):
-        account = "Conta 2"
-    else:
-        account = "Conta 1"
+    account = getAccount()
 
     formatted_message = "{} - [{}] \n => {} \n".format(account, formatted_datetime, message)
     formatted_message_colored  = color_formatted + formatted_message + '\033[0m'
@@ -541,14 +542,26 @@ if d_telegram['telegram_mode'] == True:
                 clickBtn(x_button_img)
 
         def send_help(update: Update, context: CallbackContext) -> None:
-            tMessage = "Comandos disponiveis...\n\n /print\n\n /map\n\n /bcoin\n\n /id\n"
+            tMessage = "Comandos disponiveis...\n\n /print - Printar a tela\n\n /map - Detalhes do mapa\n\n /bcoin - Saldo\n\n /account - Alternar conta\n\n /id - ID do Bot\n"
             update.message.reply_text(tMessage)
-                
+
+        def alter_account(update: Update, context: CallbackContext) -> None:
+            global open_secound_account
+            if c['usage_multi_account']:
+                open_secound_account = not open_secound_account
+                account = getAccount()
+                update.message.reply_text(f'🆎 Conta alterada para: {account}')
+                login()
+                randomMouseMovement()
+            else:
+                update.message.reply_text(f'🆎 Conta não alterada')
+
         commands = [
             ['print', send_print],
             ['id', send_id],
             ['map', send_map],
             ['bcoin', send_bcoin],
+            ['account', alter_account],
             ['help', send_help]
         ]
 
@@ -1062,7 +1075,8 @@ def main() -> None:
             last["login"] = now
             if c['usage_multi_account']:
                 open_secound_account = not open_secound_account
-                logger('🆎 Posições de conta secundária {}'.format(open_secound_account))
+                account = getAccount()
+                logger('🆎 Conta alterada para {}'.format(account))
             login()
             randomMouseMovement()
 
