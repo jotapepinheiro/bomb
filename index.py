@@ -333,7 +333,7 @@ def alertCaptcha():
 
     #tentativa de ler o ocr
     captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] - 50, popup_pos[0][1] + 140, popup_pos[0][2] - 50, popup_pos[0][3]*2))
-    img_captcha_dir = os.path.dirname(os.path.realpath(__file__)) + r'\targets\captcha1.png'
+    img_captcha_dir = os.path.dirname(os.path.realpath(__file__)) + r'/targets/captcha1.png'
     captcha_scshot.save(img_captcha_dir)
     img = trataImgCaptcha(img_captcha_dir)
 
@@ -359,7 +359,7 @@ def alertCaptcha():
     slider_positions = []
     x,y = slider_start_pos
     cp = captcha_solver.CaptchaSolver()
-    trainingPyTorch = os.path.dirname(os.path.realpath(__file__)) + r'CaptchaSolver\bomb_captcha.pt'
+    trainingPyTorch = os.path.dirname(os.path.realpath(__file__)) + r'/CaptchaSolver/bomb_captcha.pt'
     cp.initModel(trainingPyTorch, 'CaptchaSolver')
     cord_to_move = (0,0)
     for i in range(5):
@@ -384,7 +384,7 @@ def alertCaptcha():
         time.sleep(0.5)
         #encontra a posição do captcha inteiro
         captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] - 120, popup_pos[0][1] + 80, popup_pos[0][2]*1.9, popup_pos[0][3]*8.3))
-        img_captcha_dir = os.path.dirname(os.path.realpath(__file__)) + r'\targets\captcha1.png'
+        img_captcha_dir = os.path.dirname(os.path.realpath(__file__)) + r'/targets/captcha1.png'
         captcha_scshot.save(img_captcha_dir)
 
         
