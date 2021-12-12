@@ -87,7 +87,7 @@ select_heroes_mode: "green"
 # Opções disponíveis: False ou True
 save_log_to_file: False  
 
-usage_multi_account: False
+usage_multi_account: True
 screen_width: 1280
 screen_height: 1080
 

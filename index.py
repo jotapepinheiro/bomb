@@ -227,7 +227,12 @@ def getSliderPosition():
     if len (slider_pos) == 0:
         return None
     x, y, w, h = slider_pos[0]
-    position = [x+(w/2),y+(h/2)]
+
+    if (open_secound_account and c['usage_multi_account']):
+        position = [x+c['screen_width']+(w/2),y+(h/2)]
+    else:
+        position = [x+(w/2),y+(h/2)]
+
     return position
 
 def saveCaptchaSolution(img, pos):
@@ -318,7 +323,10 @@ def trataImgCaptcha(img_captcha_dir):
 
 def alertCaptcha():
     current = printScreen()
-    popup_pos = positions(robot, img=current)
+    popup_pos = positions(robot, threshold=ct['default'], img=current)
+
+    # cv2.imshow('img', current)
+    # cv2.waitKey(0)
 
     if len(popup_pos) == 0:
         logger('Captcha box não encontrado')
@@ -333,7 +341,12 @@ def alertCaptcha():
         return
 
     #tentativa de ler o ocr
-    captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] - 50, popup_pos[0][1] + 140, popup_pos[0][2] - 50, popup_pos[0][3]*2))
+    
+    if (open_secound_account and c['usage_multi_account']):
+        captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] + c['screen_width'] - 50, popup_pos[0][1] + 140, popup_pos[0][2] - 50, popup_pos[0][3]*2))
+    else:
+        captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] - 50, popup_pos[0][1] + 140, popup_pos[0][2] - 50, popup_pos[0][3]*2))
+
     img_captcha_dir = os.path.dirname(os.path.realpath(__file__)) + r'/targets/captcha1.png'
     captcha_scshot.save(img_captcha_dir)
     img = trataImgCaptcha(img_captcha_dir)
@@ -384,7 +397,13 @@ def alertCaptcha():
 
         time.sleep(0.5)
         #encontra a posição do captcha inteiro
-        captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] - 120, popup_pos[0][1] + 80, popup_pos[0][2]*1.9, popup_pos[0][3]*8.3))
+        
+
+        if (open_secound_account and c['usage_multi_account']):
+            captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] + c['screen_width'] - 120, popup_pos[0][1] + 80, popup_pos[0][2]*1.9, popup_pos[0][3]*8.3))
+        else:
+            captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] - 120, popup_pos[0][1] + 80, popup_pos[0][2]*1.9, popup_pos[0][3]*8.3))
+
         img_captcha_dir = os.path.dirname(os.path.realpath(__file__)) + r'/targets/captcha1.png'
         captcha_scshot.save(img_captcha_dir)
 
@@ -518,7 +537,7 @@ if d_telegram['telegram_mode'] == True:
         def send_help(update: Update, context: CallbackContext) -> None:
             tMessage = "Comandos disponiveis...\n\n /print\n\n /map\n\n /bcoin\n\n /id\n"
             update.message.reply_text(tMessage)
-
+                
         commands = [
             ['print', send_print],
             ['id', send_id],
@@ -557,8 +576,8 @@ def sendMapReport():
     x_offset = 0
     y_offset = 0
 
-    y = ry - y_offset
     x = rx + x_offset
+    y = ry - y_offset
 
     crop_img = sct_img[ y : y + h , x: x + w]
     #resized = cv2.resize(crop_img, (500, 250))
@@ -571,11 +590,11 @@ def sendMapReport():
     try:
         sendPossibleAmountReport(sct_img)
     except:
-        logger("Error finding chests.")
+        logger("Erro ao encontrar baús.")
 
     clickBtn(x_button_img)
     
-    logger(f'📝 Map Report sent. {d_telegram["telegram_user_name"]}', False, True)
+    logger(f'📝 Relatório de mapa enviado. {d_telegram["telegram_user_name"]}', False, True)
 
 # Send telegram message image
 def telegram_bot_sendphoto(photo_path):
@@ -660,7 +679,7 @@ def sendBCoinReport():
     telegram_bot_sendphoto('./logs/bcoin-report.png')
          
     clickBtn(x_button_img)
-    logger(f'💰 BCoin Report sent. {d_telegram["telegram_user_name"]}', False, True)
+    logger(f'💰 Relatório BCoin enviado. {d_telegram["telegram_user_name"]}', False, True)
 
 def clickBtn(img, name=None, timeout=3, threshold=ct['default']):
     global open_secound_account
@@ -744,7 +763,10 @@ def scroll():
     x,y,_,_ = commoms[len(commoms)-1]
     # print('moving to {},{} and scrolling'.format(x,y))
 
-    randomMouseMovement(False, x, y)
+    if (open_secound_account and c['usage_multi_account']):
+        randomMouseMovement(False, x+c['screen_width'], y)
+    else:
+        randomMouseMovement(False, x, y)
 
     if not c['use_click_and_drag_instead_of_scroll']:
         pyautogui.scroll(-c['scroll_size'])
@@ -755,7 +777,10 @@ def clickButtons():
     buttons = positions(go_work_img, threshold=ct['go_to_work_btn'])
     # print('buttons: {}'.format(len(buttons)))
     for (x, y, w, h) in buttons:
-        randomMouseMovement(False, x+(w/2), y+(h/2))
+        if (open_secound_account and c['usage_multi_account']):
+            randomMouseMovement(False, x+c['screen_width']+(w/2), y+(h/2))
+        else:
+            randomMouseMovement(False, x+(w/2), y+(h/2))
         pyautogui.click()
         global hero_clicks
         hero_clicks = hero_clicks + 1
@@ -794,7 +819,10 @@ def clickGreenBarButtons():
     # se tiver botao com y maior que bar y-10 e menor que y+10
     for (x, y, w, h) in not_working_green_bars:
         # isWorking(y, buttons)
-        randomMouseMovement(False, x+offset+(w/2), y+(h/2))
+        if (open_secound_account and c['usage_multi_account']):
+            randomMouseMovement(False, x+c['screen_width']+offset+(w/2), y+(h/2))
+        else:
+            randomMouseMovement(False, x+offset+(w/2), y+(h/2))
         pyautogui.click()
         global hero_clicks
         hero_clicks = hero_clicks + 1
@@ -818,7 +846,10 @@ def clickFullBarButtons():
         logger('👆 Clicando em %d heróis.' % len(not_working_full_bars))
 
     for (x, y, w, h) in not_working_full_bars:
-        randomMouseMovement(False, x+offset+(w/2), y+(h/2))
+        if (open_secound_account and c['usage_multi_account']):
+            randomMouseMovement(False, x+c['screen_width']+offset+(w/2), y+(h/2))
+        else:
+            randomMouseMovement(False, x+offset+(w/2), y+(h/2))
         pyautogui.click()
         global hero_clicks
         hero_clicks = hero_clicks + 1
@@ -865,7 +896,7 @@ def goToGame():
     clickBtn(teasureHunt_icon_img)
 
 def refreshHeroesPositions():
-    logger('🔃 Refrescando as posições dos heróis')
+    logger('🔃 Atualizando as posições dos heróis')
     clickBtn(arrow_img)
     clickBtn(teasureHunt_icon_img)
     randomMouseMovement()
