@@ -159,6 +159,9 @@ def getLeftPiece(puzzle_pieces):
     left_piece = puzzle_pieces[index_of_left_rectangle]
     return left_piece
 
+def cls():
+    os.system('cls' if os.name=='nt' else 'clear')
+
 def show(rectangles, img = None):
     if img is None:
         with mss.mss() as sct:
@@ -539,7 +542,7 @@ if d_telegram['telegram_mode'] == True:
                 clickBtn(x_button_img)
 
         def send_help(update: Update, context: CallbackContext) -> None:
-            tMessage = "Comandos disponiveis...\n\n /print - Printar a tela\n\n /map - Detalhes do mapa\n\n /bcoin - Saldo\n\n /account - Alternar conta\n\n /id - ID do Bot\n"
+            tMessage = "Comandos disponiveis...\n\n /print - Printar a tela\n\n /map - Detalhes do mapa\n\n /bcoin - Saldo\n\n /account - Alternar conta\n\n /refresh - Atualizar navegador\n\n /id - ID do Bot\n"
             update.message.reply_text(tMessage)
 
         def alter_account(update: Update, context: CallbackContext) -> None:
@@ -549,9 +552,17 @@ if d_telegram['telegram_mode'] == True:
                 account = getAccount()
                 update.message.reply_text(f'🆎 Conta alterada para: {account}')
                 if refreshHeroes() is None:
-                    update.message.reply_text('😿 Ocorreu um erro')
+                    update.message.reply_text('😿 Refresh Heroes sem retorno')
             else:
                 update.message.reply_text(f'🆎 Conta não alterada')
+
+        def send_refresh(update: Update, context: CallbackContext) -> None:
+            account = getAccount()
+            update.message.reply_text(f'🔃 Atualizando o navegador da {account}')
+            refreshBrowser()
+            time.sleep(5)
+            if login() is None:
+                update.message.reply_text('😿 Refresh Browser sem retorno')
 
         commands = [
             ['print', send_print],
@@ -559,6 +570,7 @@ if d_telegram['telegram_mode'] == True:
             ['map', send_map],
             ['bcoin', send_bcoin],
             ['account', alter_account],
+            ['refresh', send_refresh],
             ['help', send_help]
         ]
 
@@ -923,6 +935,8 @@ def refreshBrowser():
     else:
         randomMouseMovement(False, c['screen_width']/2, c['screen_height']/2)
 
+    cls()
+
     if(c['is_macos']):
         pyautogui.hotkey('command','r')
         return
@@ -937,7 +951,6 @@ def login():
     if login_attempts > 3:
         logger('🔃 Muitas tentativas de login, atualizando.')
         login_attempts = 0
-        
         refreshBrowser()
     
     if clickBtn(connect_wallet_btn_img, name='connectWalletBtn', timeout=10):
