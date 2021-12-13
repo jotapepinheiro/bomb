@@ -4,7 +4,7 @@ import os
 
 TESS_DAT = os.path.dirname(os.path.realpath(__file__)).replace('\\', '/')
 
-img = cv.imread("image.jpg")
+img = cv.imread("number.png")
 
 gry = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 thr = cv.threshold(gry, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]

@@ -1,11 +1,8 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-import pytesstrain
 import pytesseract
-import os
-import argparse
-from PIL import Image, ImageOps, ImageEnhance
+from PIL import Image
 from cv2 import cv2
 import re
 
