@@ -1215,6 +1215,7 @@ def main() -> None:
         sys.stdout.flush()
 
         # Adicionado como teste - aqui está um pouco diferente do que está no arquivo que fiz
+        # quando terminar o ciclo da conta 1 vai para conta 2
         browser = 1 if browser == 0 else 0
         time.sleep(np.random.randint(5, 10))
 
