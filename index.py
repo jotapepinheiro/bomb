@@ -55,7 +55,8 @@ pyautogui.FAILSAFE = True
 hero_clicks = 0
 new_map_clicks = 0
 login_attempts = 0
-open_secound_account = True
+current_account = 1
+browser = 0
 last_log_is_progress = False
 saldo_atual = 0.0
 
@@ -174,7 +175,7 @@ def cls():
 def show(rectangles, img=None):
     if img is None:
         with mss.mss() as sct:
-            if (open_secound_account and c['usage_multi_account']):
+            if (current_account > 1 and c['usage_multi_account']):
                 monitor = {"top": 0,
                            "left": c['screen_width'],
                            "width": c['screen_width'],
@@ -242,7 +243,7 @@ def getSliderPosition():
         return None
     x, y, w, h = slider_pos[0]
 
-    if (open_secound_account and c['usage_multi_account']):
+    if (current_account > 1 and c['usage_multi_account']):
         position = [x+c['screen_width']+(w/2), y+(h/2)]
     else:
         position = [x+(w/2), y+(h/2)]
@@ -285,7 +286,7 @@ def solveCapcha():
     x, y = slider_start_pos
     pyautogui.moveTo(x, y, 1)
     pyautogui.mouseDown()
-    if (open_secound_account and c['usage_multi_account']):
+    if (current_account > 1 and c['usage_multi_account']):
         pyautogui.moveTo(x+c['screen_width']+300, y, 0.5)
     else:
         pyautogui.moveTo(x+300, y, 0.5)
@@ -313,7 +314,7 @@ def solveCapcha():
     slider_awnser = slider_start + (middle_piece_in_percent * slider_domain)
     # arr = np.array([[int(piece_start),int(y-20),int(10),int(10)],[int(piece_middle),int(y-20),int(10),int(10)],[int(piece_end-20),int(y),int(10),int(10)],[int(slider_awnser),int(y),int(20),int(20)]])
 
-    if (open_secound_account and c['usage_multi_account']):
+    if (current_account > 1 and c['usage_multi_account']):
         pyautogui.moveTo(slider_awnser+c['screen_width'], y, 0.5)
     else:
         pyautogui.moveTo(slider_awnser, y, 0.5)
@@ -331,15 +332,14 @@ def trataImgCaptcha(img_captcha_dir):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img = cv2.medianBlur(img, 5)
     # letras brancas
-    imagem_tratada = cv2.threshold(
-        img, 127, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+    imagem_tratada = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
     cv2.imwrite(img_captcha_dir, imagem_tratada)
     time.sleep(1)
     return Image.open(img_captcha_dir)
 
 
 def getAccount():
-    if (open_secound_account and c['usage_multi_account']):
+    if (current_account > 1 and c['usage_multi_account']):
         return "CONTA 2"
     else:
         return "CONTA 1"
@@ -358,8 +358,7 @@ def alertCaptcha():
 
     account = getAccount()
 
-    test = telegram_bot_sendtext(
-        f'⚠️ ATENÇÃO! RESOLVER CAPTCHA...\n\n 🧩 {account} DO {d_telegram["telegram_user_name"]}')
+    test = telegram_bot_sendtext(f'⚠️ ATENÇÃO! RESOLVER CAPTCHA...\n\n 🧩 {account} DO {d_telegram["telegram_user_name"]}')
     logger('Captcha detectado!')
 
     slider_start_pos = getSliderPosition()
@@ -369,15 +368,12 @@ def alertCaptcha():
 
     # tentativa de ler o ocr
 
-    if (open_secound_account and c['usage_multi_account']):
-        captcha_scshot = pyautogui.screenshot(region=(
-            popup_pos[0][0] + c['screen_width'] - 50, popup_pos[0][1] + 140, popup_pos[0][2] - 50, popup_pos[0][3]*2))
+    if (current_account > 1 and c['usage_multi_account']):
+        captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] + c['screen_width'] - 50, popup_pos[0][1] + 140, popup_pos[0][2] - 50, popup_pos[0][3]*2))
     else:
-        captcha_scshot = pyautogui.screenshot(region=(
-            popup_pos[0][0] - 50, popup_pos[0][1] + 140, popup_pos[0][2] - 50, popup_pos[0][3]*2))
+        captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] - 50, popup_pos[0][1] + 140, popup_pos[0][2] - 50, popup_pos[0][3]*2))
 
-    img_captcha_dir = os.path.dirname(
-        os.path.realpath(__file__)) + r'/targets/captcha1.png'
+    img_captcha_dir = os.path.dirname(os.path.realpath(__file__)) + r'/targets/captcha1.png'
     captcha_scshot.save(img_captcha_dir)
     img = trataImgCaptcha(img_captcha_dir)
 
@@ -404,8 +400,7 @@ def alertCaptcha():
     slider_positions = []
     x, y = slider_start_pos
     cp = captcha_solver.CaptchaSolver()
-    trainingPyTorch = os.path.dirname(os.path.realpath(
-        __file__)) + r'/CaptchaSolver/bomb_captcha.pt'
+    trainingPyTorch = os.path.dirname(os.path.realpath(__file__)) + r'/CaptchaSolver/bomb_captcha.pt' 
     cp.initModel(trainingPyTorch, 'CaptchaSolver')
     cord_to_move = (0, 0)
     for i in range(5):
@@ -430,30 +425,26 @@ def alertCaptcha():
         time.sleep(0.5)
         # encontra a posição do captcha inteiro
 
-        if (open_secound_account and c['usage_multi_account']):
+        if (current_account > 1 and c['usage_multi_account']):
             captcha_scshot = pyautogui.screenshot(region=(
                 popup_pos[0][0] + c['screen_width'] - 120, popup_pos[0][1] + 80, popup_pos[0][2]*1.9, popup_pos[0][3]*8.3))
         else:
             captcha_scshot = pyautogui.screenshot(region=(
                 popup_pos[0][0] - 120, popup_pos[0][1] + 80, popup_pos[0][2]*1.9, popup_pos[0][3]*8.3))
 
-        img_captcha_dir = os.path.dirname(
-            os.path.realpath(__file__)) + r'/targets/captcha1.png'
+        img_captcha_dir = os.path.dirname(os.path.realpath(__file__)) + r'/targets/captcha1.png'
         captcha_scshot.save(img_captcha_dir)
 
         img = cv2.imread(img_captcha_dir)
         time.sleep(0.5)
-        resultado = cp.SolveCaptcha(
-            img, trainingPyTorch, 0.7, dir='CaptchaSolver')
+        resultado = cp.SolveCaptcha(img, trainingPyTorch, 0.7, dir='CaptchaSolver')
 
         if(resultado['Captcha'] == captchaValue):
-            pyautogui.moveTo(
-                slider_positions[-1][0] + 4, slider_positions[-1][1] + 3, 0.5)
+            pyautogui.moveTo(slider_positions[-1][0] + 4, slider_positions[-1][1] + 3, 0.5)
             pyautogui.mouseUp()
             break
 
-        logger(
-            f'Valor do captcha {captchaValue}, valor da imagem {resultado["Captcha"]} ')
+        logger(f'Valor do captcha {captchaValue}, valor da imagem {resultado["Captcha"]}')
 
         # envia a foto do captcha
         # telegram_bot_sendtext(f'Imagem /{i + 1}')
@@ -513,8 +504,7 @@ def logger(message, progress_indicator=False, telegram=False, color='default'):
 
     account = getAccount()
 
-    formatted_message = "{} - [{}] \n => {} \n".format(
-        account, formatted_datetime, message)
+    formatted_message = "{} - [{}] \n => {} \n".format(account, formatted_datetime, message)
     formatted_message_colored = color_formatted + formatted_message + '\033[0m'
 
     # Start progress indicator and append dots to in subsequent progress calls
@@ -555,14 +545,11 @@ if d_telegram['telegram_mode'] == True:
         def send_print(update: Update, context: CallbackContext) -> None:
             update.message.reply_text('🔃 Processando...')
             screenshot = printScreen()
-            cv2.imwrite('./logs/print-report.%s' %
-                        d_telegram["format_of_images"], screenshot)
-            update.message.reply_photo(photo=open(
-                './logs/print-report.%s' % d_telegram["format_of_images"], 'rb'))
+            cv2.imwrite('./logs/print-report.%s' % d_telegram["format_of_images"], screenshot)
+            update.message.reply_photo(photo=open('./logs/print-report.%s' % d_telegram["format_of_images"], 'rb'))
 
         def send_id(update: Update, context: CallbackContext) -> None:
-            update.message.reply_text(
-                f'🆔 Seu ID é: {update.effective_user.id}')
+            update.message.reply_text(f'🆔 Seu ID é: {update.effective_user.id}')
 
         def send_map(update: Update, context: CallbackContext) -> None:
             update.message.reply_text('🔃 Processando...')
@@ -576,24 +563,16 @@ if d_telegram['telegram_mode'] == True:
                 clickBtn(x_button_img)
 
         def send_help(update: Update, context: CallbackContext) -> None:
-            tMessage = "Comandos disponiveis...\n\n /print - Printar a tela\n\n /map - Detalhes do mapa\n\n /bcoin - Saldo\n\n /account - Alternar conta\n\n /refresh - Atualizar navegador\n\n /id - ID do Bot\n"
+            tMessage = "Comandos disponiveis...\n\n /print - Printar a tela\n\n /map - Detalhes do mapa\n\n /bcoin - Saldo\n\n /account - Conta atual\n\n /refresh - Atualizar navegador\n\n /id - ID do Bot\n"
             update.message.reply_text(tMessage)
 
-        def alter_account(update: Update, context: CallbackContext) -> None:
-            if c['usage_multi_account']:
-                global open_secound_account
-                open_secound_account = not open_secound_account
-                account = getAccount()
-                update.message.reply_text(f'🆎 Conta alterada para: {account}')
-                if refreshHeroes() is None:
-                    update.message.reply_text('😿 Refresh Heroes sem retorno')
-            else:
-                update.message.reply_text(f'🆎 Conta não alterada')
+        def get_account(update: Update, context: CallbackContext) -> None:
+            account = getAccount()
+            update.message.reply_text(f'🆎 Conta atual: {account}')
 
         def send_refresh(update: Update, context: CallbackContext) -> None:
             account = getAccount()
-            update.message.reply_text(
-                f'🔃 Atualizando o navegador da {account}')
+            update.message.reply_text(f'🔃 Atualizando o navegador da {account}')
             refreshBrowser()
             time.sleep(5)
             if login() is None:
@@ -604,7 +583,7 @@ if d_telegram['telegram_mode'] == True:
             ['id', send_id],
             ['map', send_map],
             ['bcoin', send_bcoin],
-            ['account', alter_account],
+            ['account', get_account],
             ['refresh', send_refresh],
             ['help', send_help]
         ]
@@ -660,8 +639,7 @@ def sendMapReport():
 
     clickBtn(x_button_img)
 
-    logger(
-        f'📝 Relatório de mapa enviado. {d_telegram["telegram_user_name"]}', False, True)
+    logger(f'📝 Relatório de mapa enviado. {d_telegram["telegram_user_name"]}', False, True)
 
 # Send telegram message image
 
@@ -672,8 +650,7 @@ def telegram_bot_sendphoto(photo_path):
             for chat_id in d_telegram["telegram_chat_id"]:
                 return TBot.send_photo(chat_id=chat_id, photo=open(photo_path, 'rb'))
     except:
-        logger(
-            "⛔ Incapaz de enviar mensagem de telegrama. Veja o arquivo de configuração.")
+        logger("⛔ Incapaz de enviar mensagem de telegrama. Veja o arquivo de configuração.")
 
 # Send telegram message text
 
@@ -684,8 +661,7 @@ def telegram_bot_sendtext(bot_message):
             for chat_id in d_telegram["telegram_chat_id"]:
                 return TBot.send_message(chat_id=chat_id, text=bot_message)
     except:
-        logger(
-            "⛔ Incapaz de enviar mensagem de telegrama. Veja o arquivo de configuração.")
+        logger("⛔ Incapaz de enviar mensagem de telegrama. Veja o arquivo de configuração.")
 
 # Count all chests in the map and calculate a value in BCoins.
 
@@ -756,8 +732,7 @@ def sendBCoinReport():
     telegram_bot_sendphoto('./logs/bcoin-report.png')
 
     clickBtn(x_button_img)
-    logger(
-        f'💰 Relatório BCoin enviado. {d_telegram["telegram_user_name"]}', False, True)
+    logger(f'💰 Relatório BCoin enviado. {d_telegram["telegram_user_name"]}', False, True)
 
 
 def clickBtn(img, name=None, timeout=3, threshold=ct['default']):
@@ -782,9 +757,8 @@ def clickBtn(img, name=None, timeout=3, threshold=ct['default']):
         x, y, w, h = matches[0]
         pos_click_x = x+(w/2)
         pos_click_y = y+(h/2)
-        if (open_secound_account and c['usage_multi_account']):
-            randomMouseMovement(False, pos_click_x +
-                                c['screen_width'], pos_click_y)
+        if (current_account > 1 and c['usage_multi_account']):
+            randomMouseMovement(False, pos_click_x + c['screen_width'], pos_click_y)
         else:
             randomMouseMovement(False, pos_click_x, pos_click_y)
 
@@ -796,17 +770,17 @@ def printScreen():
     with mss.mss() as sct:
         # The screen part to capture
         # monitor = sct.monitors[0]
-        if (open_secound_account and c['usage_multi_account']):
+        if (current_account > 1 and c['usage_multi_account']):
             monitor = {"top": 0,
-                       "left": c['screen_width'],
-                       "width": c['screen_width'],
-                       "height": c['screen_height']}
+                "left": c['screen_width'],
+                "width": c['screen_width'],
+                "height": c['screen_height']}
             # logger('Open screen rigth')
         else:
             monitor = {"top": 0,
-                       "left": 0,
-                       "width": c['screen_width'],
-                       "height": c['screen_height']}
+                "left": 0,
+                "width": c['screen_width'],
+                "height": c['screen_height']}
             # logger('Open screen left')
 
         # Grab the data
@@ -842,7 +816,7 @@ def scroll():
     x, y, _, _ = commoms[len(commoms)-1]
     # print('moving to {},{} and scrolling'.format(x,y))
 
-    if (open_secound_account and c['usage_multi_account']):
+    if (current_account > 1 and c['usage_multi_account']):
         randomMouseMovement(False, x+c['screen_width'], y)
     else:
         randomMouseMovement(False, x, y)
@@ -850,15 +824,14 @@ def scroll():
     if not c['use_click_and_drag_instead_of_scroll']:
         pyautogui.scroll(-c['scroll_size'])
     else:
-        pyautogui.dragRel(0, -c['click_and_drag_amount'],
-                          duration=1, button='left')
+        pyautogui.dragRel(0, -c['click_and_drag_amount'], duration=1, button='left')
 
 
 def clickButtons():
     buttons = positions(go_work_img, threshold=ct['go_to_work_btn'])
     # print('buttons: {}'.format(len(buttons)))
     for (x, y, w, h) in buttons:
-        if (open_secound_account and c['usage_multi_account']):
+        if (current_account > 1 and c['usage_multi_account']):
             randomMouseMovement(False, x+c['screen_width']+(w/2), y+(h/2))
         else:
             randomMouseMovement(False, x+(w/2), y+(h/2))
@@ -897,24 +870,21 @@ def clickGreenBarButtons():
         if not isWorking(bar, buttons):
             not_working_green_bars.append(bar)
     if len(not_working_green_bars) > 0:
-        logger('🆗 %d botões com barra verde detectados' %
-               len(not_working_green_bars))
+        logger('🆗 %d botões com barra verde detectados' % len(not_working_green_bars))
         logger('👆 Clicando em %d heróis.' % len(not_working_green_bars))
 
     # se tiver botao com y maior que bar y-10 e menor que y+10
     for (x, y, w, h) in not_working_green_bars:
         # isWorking(y, buttons)
-        if (open_secound_account and c['usage_multi_account']):
-            randomMouseMovement(
-                False, x+c['screen_width']+offset+(w/2), y+(h/2))
+        if (current_account > 1 and c['usage_multi_account']):
+            randomMouseMovement(False, x+c['screen_width']+offset+(w/2), y+(h/2))
         else:
             randomMouseMovement(False, x+offset+(w/2), y+(h/2))
         pyautogui.click()
         global hero_clicks
         hero_clicks = hero_clicks + 1
         if hero_clicks > 20:
-            logger(
-                '⛔ Muitos cliques nos heróis, tente aumentar o limite go_to_work_btn')
+            logger('⛔ Muitos cliques nos heróis, tente aumentar o limite go_to_work_btn')
             return
         #cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
     return len(not_working_green_bars)
@@ -934,9 +904,8 @@ def clickFullBarButtons():
         logger('👆 Clicando em %d heróis.' % len(not_working_full_bars))
 
     for (x, y, w, h) in not_working_full_bars:
-        if (open_secound_account and c['usage_multi_account']):
-            randomMouseMovement(
-                False, x+c['screen_width']+offset+(w/2), y+(h/2))
+        if (current_account > 1 and c['usage_multi_account']):
+            randomMouseMovement(False, x+c['screen_width']+offset+(w/2), y+(h/2))
         else:
             randomMouseMovement(False, x+offset+(w/2), y+(h/2))
         pyautogui.click()
@@ -1000,9 +969,8 @@ def refreshHeroesPositions():
 
 def refreshBrowser():
     logger('🔃 Atualizando o navegador')
-    if (open_secound_account and c['usage_multi_account']):
-        randomMouseMovement(
-            False, c['screen_width']+(c['screen_width']/2), c['screen_height']/2)
+    if (current_account > 1 and c['usage_multi_account']):
+        randomMouseMovement(False, c['screen_width']+(c['screen_width']/2), c['screen_height']/2)
     else:
         randomMouseMovement(False, c['screen_width']/2, c['screen_height']/2)
 
@@ -1091,11 +1059,9 @@ def refreshHeroes():
     goToHeroes()
 
     if c['select_heroes_mode'] == "full":
-        logger(
-            "⚒️ Enviando heróis com barra de resistência completa para o trabalho!", 'green')
+        logger("⚒️ Enviando heróis com barra de resistência completa para o trabalho!", 'green')
     elif c['select_heroes_mode'] == "green":
-        logger(
-            "⚒️ Enviando heróis com barra de resistência verde para o trabalho!", 'green')
+        logger("⚒️ Enviando heróis com barra de resistência verde para o trabalho!", 'green')
     else:
         logger("⚒️ Enviando todos os heróis para o trabalho!", 'green')
 
@@ -1146,7 +1112,7 @@ def randomMouseMovement(v_rand=True, x=c['screen_width'], y=c['screen_height']):
         xAccount2 = xAccount1 = x
         yAccount = y
 
-    if (open_secound_account and c['usage_multi_account']):
+    if (current_account > 1 and c['usage_multi_account']):
         rx = xAccount2 + getRandonPixels()
     else:
         rx = xAccount1 + getRandonPixels()
@@ -1160,32 +1126,28 @@ def randomMouseMovement(v_rand=True, x=c['screen_width'], y=c['screen_height']):
 
 
 def main() -> None:
-    global open_secound_account
-    time.sleep(5)
-    t = c['time_intervals']
+    global current_account
+    global browser
+    time.sleep(3)
 
-    # last = {
-    #     "login" : 0,
-    #     "heroes" : 0,
-    #     "new_map" : 0,
-    #     "check_for_capcha" : 0,
-    #     "refresh_heroes" : 0,
-    #     "bcoin_report" : 0
-    # }
-
-    browser = 0
     last = [
         {
+            "account": 1,
             "login": 0,
             "heroes": 0,
             "new_map": 0,
+            "check_for_capcha" : 0,
             "refresh_heroes": 0,
+            "bcoin_report" : 0
         },
         {
+            "account": 2,
             "login": 0,
             "heroes": 0,
             "new_map": 0,
+            "check_for_capcha" : 0,
             "refresh_heroes": 0,
+            "bcoin_report" : 0
         }
     ]
 
@@ -1197,16 +1159,11 @@ def main() -> None:
         if now - last[browser]["login"] > np.random.randint(cfl['init'], cfl['end']) * 60:
             sys.stdout.flush()
             last[browser]["login"] = now
-            if c['usage_multi_account']:
-                open_secound_account = not open_secound_account
-                account = getAccount()
-                logger('🆎 Conta alterada para {}'.format(account))
             login()
             randomMouseMovement()
 
         if now - last[browser]["check_for_capcha"] > t['check_for_capcha'] * 60:
             last[browser]["check_for_capcha"] = now
-            # solveCapcha()
             alertCaptcha()
             randomMouseMovement()
 
@@ -1227,20 +1184,20 @@ def main() -> None:
             randomMouseMovement()
 
         if now - last[browser]["refresh_heroes"] > np.random.randint(rhp['init'], rhp['end']) * 60:
-            # solveCapcha()
             alertCaptcha()
             last[browser]["refresh_heroes"] = now
             refreshHeroesPositions()
 
         randomMouseMovement()
-        # clickBtn(teasureHunt)
+
+        if c['usage_multi_account']:
+            browser = 1 if browser == 0 else 0
+            current_account = last[browser]["account"]
+
         logger(None, progress_indicator=True)
 
         sys.stdout.flush()
 
-        # Adicionado como teste - aqui está um pouco diferente do que está no arquivo que fiz
-        # quando terminar o ciclo da conta 1 vai para conta 2
-        browser = 1 if browser == 0 else 0
         time.sleep(np.random.randint(5, 10))
 
 
