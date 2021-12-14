@@ -3,6 +3,8 @@
 
 from cv2 import cv2
 from numpy.random.mtrand import beta
+from pyclick import HumanClicker
+
 import numpy as np
 import time
 import sys
@@ -29,6 +31,14 @@ else:
 
 current_account = 1
 browser = 0
+
+hc = HumanClicker()
+
+def randomMouseMovement(x,y,t):
+    hc.move((int(x), int(y)), t)
+
+def randomInt(init = 10, end = 1000):
+    return np.random.randint(init, end)
 
 def main() -> None:
     global current_account
@@ -63,27 +73,33 @@ def main() -> None:
             sys.stdout.flush()
             last[browser]["login"] = now
             print(f'Foi login na conta {last[browser]["account"]}')
+            randomMouseMovement(randomInt(), randomInt(), 1)
 
         if now - last[browser]["check_for_capcha"] > t['check_for_capcha'] * 60:
             last[browser]["check_for_capcha"] = now
             print(f'Foi check_for_capcha na conta {last[browser]["account"]}')
+            randomMouseMovement(randomInt(), randomInt(), 1)
 
         if now - last[browser]["bcoin_report"] > t['bcoin_report'] * 60:
             last[browser]["bcoin_report"] = now
             print(f'Foi bcoin_report na conta {last[browser]["account"]}')
+            randomMouseMovement(randomInt(), randomInt(), 1)
 
         if now - last[browser]["heroes"] > np.random.randint(shw['init'], shw['end']) * 60:
             last[browser]["heroes"] = now
             print(f'Foi heroes na conta {last[browser]["account"]}')
+            randomMouseMovement(randomInt(), randomInt(), 1)
 
         if now - last[browser]["new_map"] > np.random.randint(cnm['init'], cnm['end']):
             last[browser]["new_map"] = now
             print('Foi new_map')
             print(f'Foi new_map na conta {last[browser]["account"]}')
+            randomMouseMovement(randomInt(), randomInt(), 1)
 
         if now - last[browser]["refresh_heroes"] > np.random.randint(rhp['init'], rhp['end']) * 60:
             last[browser]["refresh_heroes"] = now
             print(f'Foi refresh_heroes na conta {last[browser]["account"]}')
+            randomMouseMovement(randomInt(), randomInt(), 1)
 
         sys.stdout.flush()
 
