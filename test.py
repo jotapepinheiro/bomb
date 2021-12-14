@@ -69,37 +69,43 @@ def main() -> None:
     while True:
         now = time.time()
 
-        if now - last[browser]["login"] > np.random.randint(cfl['init'], cfl['end']) * 60:
+        if now - last[browser]["login"] > randomInt(cfl['init'], cfl['end']) * 60:
             sys.stdout.flush()
             last[browser]["login"] = now
             print(f'Foi login na conta {last[browser]["account"]}')
             randomMouseMovement(randomInt(), randomInt(), 1)
+            time.sleep(randomInt(1, 3))
 
         if now - last[browser]["check_for_capcha"] > t['check_for_capcha'] * 60:
             last[browser]["check_for_capcha"] = now
             print(f'Foi check_for_capcha na conta {last[browser]["account"]}')
             randomMouseMovement(randomInt(), randomInt(), 1)
+            time.sleep(randomInt(1, 3))
 
         if now - last[browser]["bcoin_report"] > t['bcoin_report'] * 60:
             last[browser]["bcoin_report"] = now
             print(f'Foi bcoin_report na conta {last[browser]["account"]}')
             randomMouseMovement(randomInt(), randomInt(), 1)
+            time.sleep(randomInt(1, 3))
 
-        if now - last[browser]["heroes"] > np.random.randint(shw['init'], shw['end']) * 60:
+        if now - last[browser]["heroes"] > randomInt(shw['init'], shw['end']) * 60:
             last[browser]["heroes"] = now
             print(f'Foi heroes na conta {last[browser]["account"]}')
             randomMouseMovement(randomInt(), randomInt(), 1)
+            time.sleep(randomInt(1, 3))
 
-        if now - last[browser]["new_map"] > np.random.randint(cnm['init'], cnm['end']):
+        if now - last[browser]["new_map"] > randomInt(cnm['init'], cnm['end']):
             last[browser]["new_map"] = now
             print('Foi new_map')
             print(f'Foi new_map na conta {last[browser]["account"]}')
             randomMouseMovement(randomInt(), randomInt(), 1)
+            time.sleep(randomInt(1, 3))
 
-        if now - last[browser]["refresh_heroes"] > np.random.randint(rhp['init'], rhp['end']) * 60:
+        if now - last[browser]["refresh_heroes"] > randomInt(rhp['init'], rhp['end']) * 60:
             last[browser]["refresh_heroes"] = now
             print(f'Foi refresh_heroes na conta {last[browser]["account"]}')
             randomMouseMovement(randomInt(), randomInt(), 1)
+            time.sleep(randomInt(1, 3))
 
         sys.stdout.flush()
 
@@ -107,7 +113,7 @@ def main() -> None:
             current_account = last[browser]["account"]
             browser = 1 if browser == 0 else 0
         
-        time.sleep(np.random.randint(5, 10))
+        time.sleep(randomInt(5, 10))
         print(f'============= {browser} =============')
         print(f'============= {current_account} =============')
 
