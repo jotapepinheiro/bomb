@@ -84,7 +84,8 @@ x_button_img = cv2.imread('targets/x.png')
 teasureHunt_icon_img = cv2.imread('targets/treasure-hunt-icon.png')
 ok_btn_img = cv2.imread('targets/ok.png')
 connect_wallet_btn_img = cv2.imread('targets/connect-wallet.png')
-sign_btn_img = cv2.imread('targets/select-wallet-2.png')
+sign_btn_img_eng = cv2.imread('targets/select-wallet-2-eng.png')
+sign_btn_img_pt = cv2.imread('targets/select-wallet-2-pt.png')
 new_map_btn_img = cv2.imread('targets/new-map.png')
 green_bar = cv2.imread('targets/green-bar.png')
 full_stamina = cv2.imread('targets/full-stamina.png')
@@ -1032,7 +1033,7 @@ def login():
         # TODO mto ele da erro e poco o botao n abre
         # time.sleep(10)
 
-    if clickBtn(sign_btn_img, name='signButton', timeout=8):
+    if clickBtn(sign_btn_img_eng, name='signButton', timeout=8):
         # sometimes the sign popup appears imediately
         login_attempts = login_attempts + 1
         # print('sign button clicked')
@@ -1045,7 +1046,30 @@ def login():
         return
         # click ok button
 
-    if clickBtn(sign_btn_img, name='signBtn', timeout=20):
+    if clickBtn(sign_btn_img_pt, name='signButton', timeout=8):
+        # sometimes the sign popup appears imediately
+        login_attempts = login_attempts + 1
+        # print('sign button clicked')
+        # print('{} login attempt'.format(login_attempts))
+        # time.sleep(5)
+        if clickBtn(teasureHunt_icon_img, name='teasureHunt', timeout=15):
+            # print('sucessfully login, treasure hunt btn clicked')
+            login_attempts = 0
+        # time.sleep(15)
+        return
+        # click ok button
+
+    if clickBtn(sign_btn_img_eng, name='signBtn', timeout=20):
+        login_attempts = login_attempts + 1
+        # print('sign button clicked')
+        # print('{} login attempt'.format(login_attempts))
+        # time.sleep(25)
+        if clickBtn(teasureHunt_icon_img, name='teasureHunt', timeout=25):
+            # print('sucessfully login, treasure hunt btn clicked')
+            login_attempts = 0
+        # time.sleep(15)
+
+    if clickBtn(sign_btn_img_pt, name='signBtn', timeout=20):
         login_attempts = login_attempts + 1
         # print('sign button clicked')
         # print('{} login attempt'.format(login_attempts))
