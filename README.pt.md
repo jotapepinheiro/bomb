@@ -65,4 +65,12 @@ O bot não interage diretamente com o jogo, ele somente tira print da tela do
 game para encontrar os botões e simula movimentos do mouse, isso faz com que
 diferenciar o bot de um humano seja muito difícil.
 
+### Algumas configuraçoes podem ser mudadas no arquivo config.yaml, nao se
+### esqueça de reiniciar o bot caso mude as configuraçoes.
+
 ## Curtiu? Dê aquela fortalecida :)
+
+### Wallet:
+#### 0xbd06182D8360FB7AC1B05e871e56c76372510dDf
+### Paypal:
+[Donate](https://www.paypal.com/donate?hosted_button_id=JVYSC6ZYCNQQQ)

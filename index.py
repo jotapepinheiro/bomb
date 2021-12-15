@@ -1,4 +1,13 @@
+# -*- coding: utf-8 -*-
 from cv2 import cv2
+
+from captcha.solveCaptcha import solveCaptcha
+
+from os import listdir
+from src.logger import logger, loggerMapClicked
+from random import randint
+from random import random
+
 import numpy as np
 import mss
 import pyautogui
@@ -7,7 +16,6 @@ import sys
 
 import yaml
 
-import requests
 
 cat = """
                                                 _
@@ -25,101 +33,129 @@ cat = """
                                                   ; '   : :`-:     _.`* ;
                                                .*' /  .*' ; .*`- +'  `*'
                                                `*-*   `*-*  `*-*'
-====== Please, consider buying me an coffe :) =========================
-==== 0xbd06182D8360FB7AC1B05e871e56c76372510dDf =======================
-==== https://www.paypal.com/donate?hosted_button_id=JVYSC6ZYCNQQQ =====
+   
+ d888b  d8888b. db    db d8888b.  .d88b.     .d8b.   .o88b. db      
+88' Y8b 88  `8D 88    88 88  `8D .8P  Y8.   d8' `8b d8P  Y8 88      
+88      88oobY' 88    88 88oodD' 88    88   88ooo88 8P      88      
+88  ooo 88`8b   88    88 88~~~   88    88   88~~~88 8b      88      
+88. ~8~ 88 `88. 88b  d88 88      `8b  d8'   88   88 Y8b  d8 88booo. 
+ Y888P  88   YD ~Y8888P' 88       `Y88P'    YP   YP  `Y88P' Y88888P 
+=======================================================================
+=========================== GRUPO ACL v1 ==============================
 =======================================================================
 
->>---> Press ctrl + c to kill the bot.
->>---> Some configs can be fount in the config.yaml file.
+>>---> Pressione ctrl + c para encerrar o bot.
+>>---> Algumas configurações podem ser encontradas no arquivo config.yaml.
 """
 
 print(cat)
 
-headers = {
-    'authority': 'plausible.io',
-    'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
-    'content-type': 'text/plain',
-    'accept': '*/*',
-    'sec-gpc': '1',
-    'origin': 'https://mpcabete.xyz',
-    'sec-fetch-site': 'cross-site',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-dest': 'empty',
-    'referer': 'https://mpcabete.xyz/',
-    'accept-language': 'en-US,en;q=0.9',
-}
-
-data = '{"n":"pageview","u":"https://mpcabete.xyz/bombcrypto/","d":"mpcabete.xyz","r":"https://mpcabete.xyz/","w":1182}'
-
-response = requests.post(
-    'https://plausible.io/api/event', headers=headers, data=data)
 
 if __name__ == '__main__':
-
     stream = open("config.yaml", 'r')
     c = yaml.safe_load(stream)
+
 ct = c['threshold']
+ch = c['home']
+
+if not ch['enable']:
+    print('>>---> Home feature not enabled')
+print('\n')
 
 pyautogui.PAUSE = c['time_intervals']['interval_between_moviments']
 
-pyautogui.FAILSAFE = True
+pyautogui.FAILSAFE = False
 hero_clicks = 0
 login_attempts = 0
 last_log_is_progress = False
 
 
-go_work_img = cv2.imread('targets/go-work.png')
-commom_img = cv2.imread('targets/commom-text.png')
-arrow_img = cv2.imread('targets/go-back-arrow.png')
-hero_img = cv2.imread('targets/hero-icon.png')
-x_button_img = cv2.imread('targets/x.png')
-teasureHunt_icon_img = cv2.imread('targets/treasure-hunt-icon.png')
-ok_btn_img = cv2.imread('targets/ok.png')
-connect_wallet_btn_img = cv2.imread('targets/connect-wallet.png')
-select_wallet_hover_img = cv2.imread('targets/select-wallet-1-hover.png')
-select_metamask_no_hover_img = cv2.imread(
-    'targets/select-wallet-1-no-hover.png')
-sign_btn_img = cv2.imread('targets/select-wallet-2.png')
-new_map_btn_img = cv2.imread('targets/new-map.png')
-green_bar = cv2.imread('targets/green-bar.png')
+def addRandomness(n, randomn_factor_size=None):
+    if randomn_factor_size is None:
+        randomness_percentage = 0.1
+        randomn_factor_size = randomness_percentage * n
+
+    random_factor = 2 * random() * randomn_factor_size
+    if random_factor > 5:
+        random_factor = 5
+    without_average_random_factor = n - randomn_factor_size
+    randomized_n = int(without_average_random_factor + random_factor)
+    # logger('{} with randomness -> {}'.format(int(n), randomized_n))
+    return int(randomized_n)
+
+
+def moveToWithRandomness(x, y, t):
+    pyautogui.moveTo(addRandomness(x, 10), addRandomness(y, 10), t+random()/2)
+
+
+def remove_suffix(input_string, suffix):
+    if suffix and input_string.endswith(suffix):
+        return input_string[:-len(suffix)]
+    return input_string
+
+
+def load_images():
+    file_names = listdir('./targets/')
+    targets = {}
+    for file in file_names:
+        path = 'targets/' + file
+        targets[remove_suffix(file, '.png')] = cv2.imread(path)
+
+    return targets
+
+
+images = load_images()
+
+
+def loadHeroesToSendHome():
+    file_names = listdir('./targets/heroes-to-send-home')
+    heroes = []
+    for file in file_names:
+        path = './targets/heroes-to-send-home/' + file
+        heroes.append(cv2.imread(path))
+
+    print('>>---> %d heroes that should be sent home loaded' % len(heroes))
+    return heroes
+
+
+if ch['enable']:
+    home_heroes = loadHeroesToSendHome()
+
+# go_work_img = cv2.imread('targets/go-work.png')
+# commom_img = cv2.imread('targets/commom-text.png')
+# arrow_img = cv2.imread('targets/go-back-arrow.png')
+# hero_img = cv2.imread('targets/hero-icon.png')
+# x_button_img = cv2.imread('targets/x.png')
+# teasureHunt_icon_img = cv2.imread('targets/treasure-hunt-icon.png')
+# ok_btn_img = cv2.imread('targets/ok.png')
+# connect_wallet_btn_img = cv2.imread('targets/connect-wallet.png')
+# select_wallet_hover_img = cv2.imread('targets/select-wallet-1-hover.png')
+# select_metamask_no_hover_img = cv2.imread('targets/select-wallet-1-no-hover.png')
+# sign_btn_img = cv2.imread('targets/select-wallet-2.png')
+# new_map_btn_img = cv2.imread('targets/new-map.png')
+# green_bar = cv2.imread('targets/green-bar.png')
 full_stamina = cv2.imread('targets/full-stamina.png')
 
+robot = cv2.imread('targets/robot.png')
+# puzzle_img = cv2.imread('targets/puzzle.png')
+# piece = cv2.imread('targets/piece.png')
+slider = cv2.imread('targets/slider.png')
+navigator_img = cv2.imread('targets/navigator.png')
 
-def logger(message, progress_indicator=False):
-    global last_log_is_progress
 
-    # Start progress indicator and append dots to in subsequent progress calls
-    if progress_indicator:
-        if not last_log_is_progress:
-            last_log_is_progress = True
-            sys.stdout.write('\n => .')
-            sys.stdout.flush()
-        else:
-            sys.stdout.write('.')
-            sys.stdout.flush()
+def show(rectangles, img=None):
 
-        return
+    if img is None:
+        with mss.mss() as sct:
+            monitor = sct.monitors[0]
+            img = np.array(sct.grab(monitor))
 
-    if last_log_is_progress:
-        sys.stdout.write('\n\n')
-        sys.stdout.flush()
-        last_log_is_progress = False
+    for (x, y, w, h) in rectangles:
+        cv2.rectangle(img, (x, y), (x + w, y + h), (255, 255, 255, 255), 2)
 
-    datetime = time.localtime()
-    formatted_datetime = time.strftime("%d/%m/%Y %H:%M:%S", datetime)
-
-    formatted_message = "[{}] \n => {} \n\n".format(
-        formatted_datetime, message)
-
-    print(formatted_message)
-
-    if (c['save_log_to_file'] == True):
-        logger_file = open("logger.log", "a")
-        logger_file.write(formatted_message)
-        logger_file.close()
-
-    return True
+    # cv2.rectangle(img, (result[0], result[1]), (result[0] + result[2], result[1] + result[3]), (255,50,255), 2)
+    cv2.imshow('img', img)
+    cv2.waitKey(0)
 
 
 def clickBtn(img, name=None, timeout=3, threshold=ct['default']):
@@ -142,24 +178,28 @@ def clickBtn(img, name=None, timeout=3, threshold=ct['default']):
             continue
 
         x, y, w, h = matches[0]
-        pyautogui.moveTo(x+w/2, y+h/2, 1)
+        pos_click_x = x+w/2
+        pos_click_y = y+h/2
+        # mudar moveto pra w randomness
+        moveToWithRandomness(pos_click_x, pos_click_y, 1)
         pyautogui.click()
         return True
 
 
 def printSreen():
     with mss.mss() as sct:
+        monitor = sct.monitors[0]
+        sct_img = np.array(sct.grab(monitor))
         # The screen part to capture
-        monitor = {"top": 160, "left": 160, "width": 1000, "height": 135}
+        # monitor = {"top": 160, "left": 160, "width": 1000, "height": 135}
 
         # Grab the data
-        #sct_img = np.array(sct.grab(monitor))
-        sct_img = np.array(sct.grab(sct.monitors[0]))
         return sct_img[:, :, :3]
 
 
-def positions(target, threshold=ct['default']):
-    img = printSreen()
+def positions(target, threshold=ct['default'], img=None):
+    if img is None:
+        img = printSreen()
     result = cv2.matchTemplate(img, target, cv2.TM_CCOEFF_NORMED)
     w = target.shape[1]
     h = target.shape[0]
@@ -177,14 +217,12 @@ def positions(target, threshold=ct['default']):
 
 def scroll():
 
-    commoms = positions(commom_img, threshold=ct['commom'])
+    commoms = positions(images['commom-text'], threshold=ct['commom'])
     if (len(commoms) == 0):
-        # print('no commom text found')
         return
     x, y, w, h = commoms[len(commoms)-1]
-    # print('moving to {},{} and scrolling'.format(x,y))
 #
-    pyautogui.moveTo(x, y, 1)
+    moveToWithRandomness(x, y, 1)
 
     if not c['use_click_and_drag_instead_of_scroll']:
         pyautogui.scroll(-c['scroll_size'])
@@ -194,10 +232,10 @@ def scroll():
 
 
 def clickButtons():
-    buttons = positions(go_work_img, threshold=ct['go_to_work_btn'])
+    buttons = positions(images['go-work'], threshold=ct['go_to_work_btn'])
     # print('buttons: {}'.format(len(buttons)))
     for (x, y, w, h) in buttons:
-        pyautogui.moveTo(x+(w/2), y+(h/2), 1)
+        moveToWithRandomness(x+(w/2), y+(h/2), 1)
         pyautogui.click()
         global hero_clicks
         hero_clicks = hero_clicks + 1
@@ -206,6 +244,18 @@ def clickButtons():
             logger('too many hero clicks, try to increase the go_to_work_btn threshold')
             return
     return len(buttons)
+
+
+def isHome(hero, buttons):
+    y = hero[1]
+
+    for (_, button_y, _, button_h) in buttons:
+        isBelow = y < (button_y + button_h)
+        isAbove = y > (button_y - button_h)
+        if isBelow and isAbove:
+            # if send-home button exists, the hero is not home
+            return False
+    return True
 
 
 def isWorking(bar, buttons):
@@ -222,29 +272,31 @@ def isWorking(bar, buttons):
 def clickGreenBarButtons():
     # ele clicka nos q tao trabaiano mas axo q n importa
     offset = 130
-    green_bars = positions(green_bar, threshold=ct['green_bar'])
-    logger('%d green bars detected' % len(green_bars))
-    buttons = positions(go_work_img, threshold=ct['go_to_work_btn'])
-    logger('%d buttons detected' % len(buttons))
+
+    green_bars = positions(images['green-bar'], threshold=ct['green_bar'])
+    logger('🟩 %d green bars detected' % len(green_bars))
+    buttons = positions(images['go-work'], threshold=ct['go_to_work_btn'])
+    logger('🆗 %d buttons detected' % len(buttons))
 
     not_working_green_bars = []
     for bar in green_bars:
         if not isWorking(bar, buttons):
             not_working_green_bars.append(bar)
     if len(not_working_green_bars) > 0:
-        logger('%d buttons with green bar detected' %
+        logger('🆗 %d buttons with green bar detected' %
                len(not_working_green_bars))
-        logger('Clicking in %d heroes.' % len(not_working_green_bars))
+        logger('👆 Clicking in %d heroes' % len(not_working_green_bars))
 
     # se tiver botao com y maior que bar y-10 e menor que y+10
     for (x, y, w, h) in not_working_green_bars:
         # isWorking(y, buttons)
-        pyautogui.moveTo(x+offset+(w/2), y+(h/2), 1)
+        moveToWithRandomness(x+offset+(w/2), y+(h/2), 1)
         pyautogui.click()
         global hero_clicks
         hero_clicks = hero_clicks + 1
         if hero_clicks > 20:
-            logger('too many hero clicks, try to increase the go_to_work_btn threshold')
+            logger(
+                '⚠️ Too many hero clicks, try to increase the go_to_work_btn threshold')
             return
         #cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
     return len(not_working_green_bars)
@@ -252,8 +304,8 @@ def clickGreenBarButtons():
 
 def clickFullBarButtons():
     offset = 100
-    full_bars = positions(full_stamina, threshold=ct['default'])
-    buttons = positions(go_work_img, threshold=ct['go_to_work_btn'])
+    full_bars = positions(images['full-stamina'], threshold=ct['default'])
+    buttons = positions(images['go-work'], threshold=ct['go_to_work_btn'])
 
     not_working_full_bars = []
     for bar in full_bars:
@@ -261,10 +313,10 @@ def clickFullBarButtons():
             not_working_full_bars.append(bar)
 
     if len(not_working_full_bars) > 0:
-        logger('Clicking in %d heroes.' % len(not_working_full_bars))
+        logger('👆 Clicking in %d heroes' % len(not_working_full_bars))
 
     for (x, y, w, h) in not_working_full_bars:
-        pyautogui.moveTo(x+offset+(w/2), y+(h/2), 1)
+        moveToWithRandomness(x+offset+(w/2), y+(h/2), 1)
         pyautogui.click()
         global hero_clicks
         hero_clicks = hero_clicks + 1
@@ -273,61 +325,67 @@ def clickFullBarButtons():
 
 
 def goToHeroes():
-    if clickBtn(arrow_img):
+    if clickBtn(images['go-back-arrow']):
         global login_attempts
         login_attempts = 0
 
-    # time.sleep(5)
-    clickBtn(hero_img)
-    # time.sleep(5)
+    solveCaptcha()
+    # TODO tirar o sleep quando colocar o pulling
+    time.sleep(1)
+    clickBtn(images['hero-icon'])
+    time.sleep(1)
+    solveCaptcha()
 
 
 def goToGame():
     # in case of server overload popup
-    clickBtn(x_button_img)
+    clickBtn(images['x'])
     # time.sleep(3)
-    clickBtn(x_button_img)
+    clickBtn(images['x'])
 
-    clickBtn(teasureHunt_icon_img)
+    clickBtn(images['treasure-hunt-icon'])
 
 
 def refreshHeroesPositions():
-    clickBtn(arrow_img)
-    clickBtn(teasureHunt_icon_img)
+
+    logger('🔃 Refreshing Heroes Positions')
+    clickBtn(images['go-back-arrow'])
+    clickBtn(images['treasure-hunt-icon'])
+
     # time.sleep(3)
-    clickBtn(teasureHunt_icon_img)
+    clickBtn(images['treasure-hunt-icon'])
 
 
 def login():
     global login_attempts
+    logger('😿 Checking if game has disconnected')
 
     if login_attempts > 3:
-        logger('Too many login attempts, refreshing.')
+        logger('🔃 Too many login attempts, refreshing')
         login_attempts = 0
         pyautogui.hotkey('ctrl', 'f5')
         return
 
-    if clickBtn(connect_wallet_btn_img, name='connectWalletBtn', timeout=10):
+    if clickBtn(images['connect-wallet'], name='connectWalletBtn', timeout=10):
+        solveCaptcha()
         login_attempts = login_attempts + 1
-        logger('Connect wallet button detected, logging in!')
+        logger('🎉 Connect wallet button detected, logging in!')
         # TODO mto ele da erro e poco o botao n abre
         # time.sleep(10)
 
-    if clickBtn(sign_btn_img, name='sign button', timeout=8):
+    if clickBtn(images['select-wallet-2'], name='sign button', timeout=8):
         # sometimes the sign popup appears imediately
         login_attempts = login_attempts + 1
         # print('sign button clicked')
         # print('{} login attempt'.format(login_attempts))
-        # time.sleep(5)
-        if clickBtn(teasureHunt_icon_img, name='teasureHunt', timeout=15):
+        if clickBtn(images['treasure-hunt-icon'], name='teasureHunt', timeout=15):
             # print('sucessfully login, treasure hunt btn clicked')
             login_attempts = 0
-        # time.sleep(15)
         return
         # click ok button
 
-    if not clickBtn(select_metamask_no_hover_img, name='selectMetamaskBtn'):
-        if clickBtn(select_wallet_hover_img, name='selectMetamaskHoverBtn', threshold=ct['select_wallet_buttons']):
+    if not clickBtn(images['select-wallet-1-no-hover'], name='selectMetamaskBtn'):
+        if clickBtn(images['select-wallet-1-hover'], name='selectMetamaskHoverBtn', threshold=ct['select_wallet_buttons']):
             pass
             # o ideal era que ele alternasse entre checar cada um dos 2 por um tempo
             # print('sleep in case there is no metamask text removed')
@@ -337,31 +395,70 @@ def login():
         # print('sleep in case there is no metamask text removed')
         # time.sleep(20)
 
-    if clickBtn(sign_btn_img, name='signBtn', timeout=20):
+    if clickBtn(images['select-wallet-2'], name='signBtn', timeout=20):
         login_attempts = login_attempts + 1
         # print('sign button clicked')
         # print('{} login attempt'.format(login_attempts))
         # time.sleep(25)
-        if clickBtn(teasureHunt_icon_img, name='teasureHunt', timeout=25):
+        if clickBtn(images['treasure-hunt-icon'], name='teasureHunt', timeout=25):
             # print('sucessfully login, treasure hunt btn clicked')
             login_attempts = 0
         # time.sleep(15)
 
-    if clickBtn(ok_btn_img, name='okBtn', timeout=5):
+    if clickBtn(images['ok'], name='okBtn', timeout=5):
         pass
         # time.sleep(15)
         # print('ok button clicked')
 
 
+def sendHeroesHome():
+    if not ch['enable']:
+        return
+    heroes_positions = []
+    for hero in home_heroes:
+        hero_positions = positions(hero, threshold=ch['hero_threshold'])
+        if not len(hero_positions) == 0:
+            # TODO maybe pick up match with most wheight instead of first
+            hero_position = hero_positions[0]
+            heroes_positions.append(hero_position)
+
+    n = len(heroes_positions)
+    if n == 0:
+        print('No heroes that should be sent home found.')
+        return
+    print(' %d heroes that should be sent home found' % n)
+    # if send-home button exists, the hero is not home
+    go_home_buttons = positions(
+        images['send-home'], threshold=ch['home_button_threshold'])
+    # TODO pass it as an argument for both this and the other function that uses it
+    go_work_buttons = positions(
+        images['go-work'], threshold=ct['go_to_work_btn'])
+
+    for position in heroes_positions:
+        if not isHome(position, go_home_buttons):
+            print(isWorking(position, go_work_buttons))
+            if(not isWorking(position, go_work_buttons)):
+                print('hero not working, sending him home')
+                moveToWithRandomness(
+                    go_home_buttons[0][0]+go_home_buttons[0][2]/2, position[1]+position[3]/2, 1)
+                pyautogui.click()
+            else:
+                print('hero working, not sending him home(no dark work button)')
+        else:
+            print('hero already home, or home full(no dark home button)')
+
+
 def refreshHeroes():
+    logger('🏢 Search for heroes to work')
+
     goToHeroes()
 
     if c['select_heroes_mode'] == "full":
-        logger("Sending heroes with full stamina bar to work!")
+        logger('⚒️ Sending heroes with full stamina bar to work', 'green')
     elif c['select_heroes_mode'] == "green":
-        logger("Sending heroes with green stamina bar to work!")
+        logger('⚒️ Sending heroes with green stamina bar to work', 'green')
     else:
-        logger("Sending all heroes to work!")
+        logger('⚒️ Sending all heroes to work', 'green')
 
     buttonsClicked = 1
     empty_scrolls_attempts = c['scroll_attemps']
@@ -374,11 +471,13 @@ def refreshHeroes():
         else:
             buttonsClicked = clickButtons()
 
+        sendHeroesHome()
+
         if buttonsClicked == 0:
             empty_scrolls_attempts = empty_scrolls_attempts - 1
         scroll()
         time.sleep(2)
-    logger('{} heroes sent to work so far'.format(hero_clicks))
+    logger('💪 {} heroes sent to work'.format(hero_clicks))
     goToGame()
 
 
@@ -386,38 +485,59 @@ def main():
     time.sleep(5)
     t = c['time_intervals']
 
-    last = {
-        "login": 0,
-        "heroes": 0,
-        "new_map": 0,
-        "refresh_heroes": 0
-    }
+    browser = 0
+    last = [
+        {
+            "login": 0,
+            "heroes": 0,
+            "new_map": 0,
+            "check_for_captcha": 0,
+            "refresh_heroes": 0,
+        },
+        {
+            "login": 0,
+            "heroes": 0,
+            "new_map": 0,
+            "check_for_captcha": 0,
+            "refresh_heroes": 0,
+        }
+    ]
 
     while True:
         now = time.time()
 
-        if now - last["heroes"] > t['send_heroes_for_work'] * 60:
-            last["heroes"] = now
-            logger('Sending heroes to work.')
+        if now - last[browser]["check_for_captcha"] > addRandomness(t['check_for_captcha'] * 60):
+            last[browser]["check_for_captcha"] = now
+            solveCaptcha()
+
+        if now - last[browser]["heroes"] > addRandomness(t['send_heroes_for_work'] * 60):
+            last[browser]["heroes"] = now
             refreshHeroes()
 
-        if now - last["login"] > t['check_for_login'] * 60:
-            logger("Checking if game has disconnected.")
+        if now - last[browser]["login"] > addRandomness(t['check_for_login'] * 60):
             sys.stdout.flush()
-            last["login"] = now
+            last[browser]["login"] = now
             login()
 
-        if now - last["new_map"] > t['check_for_new_map_button']:
-            last["new_map"] = now
-            if clickBtn(new_map_btn_img):
-                with open('new-map.log', 'a') as new_map_log:
-                    new_map_log.write(str(time.time())+'\n')
-                logger('New Map button clicked!')
+        if now - last[browser]["new_map"] > t['check_for_new_map_button']:
+            last[browser]["new_map"] = now
 
-        if now - last["refresh_heroes"] > t['refresh_heroes_positions'] * 60:
-            last["refresh_heroes"] = now
-            logger('Refreshing Heroes Positions.')
+            if clickBtn(images['new-map']):
+                loggerMapClicked()
+
+        if now - last[browser]["refresh_heroes"] > addRandomness(t['refresh_heroes_positions'] * 60):
+            solveCaptcha()
+            last[browser]["refresh_heroes"] = now
             refreshHeroesPositions()
+
+        browser_list = positions(navigator_img, threshold=ct['default'])
+        if len(browser_list) > 1:
+            logger('Trocando de browser')
+            browser = 1 if browser == 0 else 0
+            x, y, w, h = browser_list[browser]
+            pyautogui.moveTo(x+w/2, y+h/2, 1)
+            pyautogui.click()
+            time.sleep(1)
 
         # clickBtn(teasureHunt)
         logger(None, progress_indicator=True)
@@ -428,6 +548,7 @@ def main():
 
 
 main()
+# sendHeroesHome()
 
 
 # cv2.imshow('img',sct_img)
@@ -442,3 +563,6 @@ main()
 
 # pegar o offset dinamicamente
 # clickar so no q nao tao trabalhando pra evitar um loop infinito no final do scroll se ainda tiver um verdinho
+# pip uninstall opencv-python
+
+# pip install --upgrade opencv-python==4.5.3.56

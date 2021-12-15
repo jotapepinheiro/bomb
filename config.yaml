@@ -20,12 +20,19 @@
     refresh_heroes_positions: 3
     
     # [en_US] Time interval to check for new maps
-    # Default value (in minutes): 3 
+    # Default value (in minutes): 5 
     #
     # [pt_BR] Intervalo de tempo para verificar por novos mapas
-    # Valor padrão (em minutos): 3
-    check_for_new_map_button: 3
+    # Valor padrão (em segundos): 5
+    check_for_new_map_button: 5
     
+    # [en_US] Time interval to check for captcha.
+    # Default value (in minutes): 1
+    #
+    # [pt_BR] Intervalo de tempo para verificar se precisa resolver o captcha.
+    # Valor padrão (em minutos): 1
+    check_for_captcha: 1
+
     # [en_US] Time interval to check for login request
     # Default value (in minutes): 3
     #
@@ -44,20 +51,20 @@
   #
   # [pt_BR] O quão confiante o bot precisa estar para clicar nos botões (valores entre 0 e 1. 0 é o valor mínimo, 1 é o valor máximo)
   #
-  trashhold:
+  threshold:
     # [en_US]
     # Default value: 0.7
     #
     # [pt_BR]
     # Valor padrão: 0.7
-    default: 0.6
+    default: 0.7
 
     # [en_US]
     # Default value: 0.8
     #
     # [pt_BR]
     # Valor padrão: 0.8
-    commom: 0.6
+    commom: 0.8
 
     # [en_US]
     # Default value: 0.8
@@ -80,6 +87,14 @@
     # Valor padrão: 0.9
     green_bar: 0.9
 
+  home:
+    enable: False
+    # If bot is sending the wrong hero home, make this number bigger.
+    # if bot is not sending any hero home make this number smaller.
+    hero_threshold: 0.8
+    home_button_threshold: 0.9
+
+
   # [en_US]
   # Default value: 60
   #
@@ -92,7 +107,7 @@
   #
   # [pt_BR]
   # Valor padrão: 3
-  scroll_attemps: 2
+  scroll_attemps: 3
 
   # [en_US]
   # Default value: true
@@ -123,16 +138,6 @@
   # full  = seleciona somente os heróis com a barra de stamina cheia
   select_heroes_mode: "green"
 
-  #utilizado para verificar se o envio (verificação da energia) será geral ou conforme o tipo
-  select_heroes_by_rarity: True
-
-  #configuração para envio, conforme a raridade, se a configuração acima estiver = "True"
-  select_common_heroes_mode: "green"
-  select_rare_heroes_mode: "green"
-  select_super_rare_heroes_mode: "full"
-  select_epic_heroes_mode: "full"
-  select_legendary_heroes_mode: "full"
-
   # [en_US] Option for save logs to a file (logs.txt)
   # Default value: False
   # Available options: False or True
@@ -140,10 +145,4 @@
   # [pt_BR] Opção para salvar os logs em arquivo (logs.txt)
   # Valor padrão : False
   # Opções disponíveis: False ou True
-  save_log_to_file: False  
-
-  usage_multi_account: False
-  offset_secound_account: 1280
-  height_secound_account: 1080
-
-  is_macos: True
+  save_log_to_file: False
