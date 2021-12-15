@@ -402,7 +402,6 @@ def alertCaptcha():
     cp = captcha_solver.CaptchaSolver()
     trainingPyTorch = os.path.dirname(os.path.realpath(__file__)) + r'/CaptchaSolver/bomb_captcha.pt' 
     cp.initModel(trainingPyTorch, 'CaptchaSolver')
-    cord_to_move = (0, 0)
     for i in range(5):
         if i == 0:
             # pyautogui.moveTo(x, y, 1)
@@ -437,7 +436,12 @@ def alertCaptcha():
 
         img = cv2.imread(img_captcha_dir)
         time.sleep(0.5)
-        resultado = cp.SolveCaptcha(img, trainingPyTorch, 0.7, dir='CaptchaSolver')
+
+        try:
+            resultado = cp.SolveCaptcha(img, trainingPyTorch, 0.7, dir='CaptchaSolver')
+        except:
+            logger(f'⛔ Erro ao resolver o Captcha.', False, True)
+            return
 
         if(resultado['Captcha'] == captchaValue):
             pyautogui.moveTo(slider_positions[-1][0] + 4, slider_positions[-1][1] + 3, 0.5)
@@ -980,7 +984,7 @@ def refreshBrowser():
         pyautogui.hotkey('command', 'r')
         return
     else:
-        pyautogui.hotkey('ctrl', 'f5')
+        pyautogui.hotkey('ctrl', 'shift', 'r')
         return
 
 
