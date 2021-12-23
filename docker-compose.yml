@@ -1,0 +1,29 @@
+version: "3"
+services:
+  bomb:
+    container_name: bomb
+    tty: true
+    build:
+      context: .
+    restart: unless-stopped
+    cap_add:
+      # Google Chrome
+      - SYS_ADMIN
+    deploy:
+      resources:
+        limits:
+          cpus: '3'
+          memory: 3G
+    environment:
+      - VNC_PASSWORD=123mudar
+      - HTTP_PASSWORD=123mudar
+      - TZ=America/Sao_Paulo
+      - RESOLUTION=1024x800
+      - USER=ubuntu
+      - PASSWORD=123mudar
+    volumes:
+       - /dev/shm:/dev/shm
+       - ./bomb:/home/ubuntu/Desktop/bomb:ro
+    ports:
+      - 5900:5900
+      - 6080:80

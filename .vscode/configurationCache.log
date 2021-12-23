@@ -1,0 +1,1 @@
+{"buildTargets":["bot-1-init","bot-1-rebuild","bot-1-shell","bot-2-init","bot-2-rebuild","bot-2-shell","help","rebuild-all","start-all","stop-all"],"launchTargets":[],"customConfigurationProvider":{"workspaceBrowse":{"browsePath":[],"compilerArgs":[]},"fileIndex":[]}}
