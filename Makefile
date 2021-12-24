@@ -9,14 +9,14 @@ down-all: ## Desligar todos os containers
 	docker-compose down
 
 commit-all: ## Salvar todos os containers
-	docker commit bomb bombdocker_bomb:latest
+	docker commit bot_bomb bomb_bot_bomb:latest
 
 bomb-shell: ## Acessar container bomb
-	docker container exec -it bomb bash
+	docker container exec -it bot_bomb bash
 
 ## —— SSH 🎶 ———————————————————————————————————————————————————————————————
 bomb-ssh: ## Enviar comando para bomb
-	docker-compose exec bomb sh -c "cd /home/ubuntu/Desktop/bomb \
+	docker-compose exec bot_bomb sh -c "cd /home/ubuntu/Desktop/bomb \
 	&& python3 index.py"
 
 ## —— Outros 🛠️️ ———————————————————————————————————————————————————————————————

@@ -9,6 +9,7 @@ import numpy as np
 import mss
 import pyautogui
 import telegram
+import os
 import time
 import sys
 import yaml
@@ -55,7 +56,7 @@ try:
     TelegramEmergencyCall = streamConfigTelegram['enable_emergency_call']
     stream.close()
 except FileNotFoundError:
-    print('Info: Telegram not configure, rename EXAMPLE-telegram.yaml to telegram.yaml')
+    print('Info: Telegram not configure, rename copy_telegram.yaml to telegram.yaml')
 
 hc = HumanClicker()
 pyautogui.PAUSE = streamConfig['time_intervals']['interval_between_movements']
@@ -170,8 +171,8 @@ if telegramIntegration == True:
                 update.message.reply_text('🔃 Refreshing page')
 
         def send_stop(update: Update, context: CallbackContext) -> None:
-            update.message.reply_text(
-                f'🛑 Shutting down bot...')
+            logger('Shutting down bot...', telegram=True, emoji='🛑')
+            os._exit(0)
 
         commands = [
             ['print', send_print],

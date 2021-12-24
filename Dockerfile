@@ -29,4 +29,5 @@ RUN sudo apt update \
 COPY ./bomb /home/ubuntu/Desktop/bomb
 
 RUN pip install -r /home/ubuntu/Desktop/bomb/requirements.txt
-    
+
+RUN cp /home/ubuntu/Desktop/bomb/config/copy_telegram.yaml /home/ubuntu/Desktop/bomb/config/telegram.yaml

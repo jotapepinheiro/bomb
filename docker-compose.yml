@@ -1,7 +1,7 @@
 version: "3"
 services:
-  bomb:
-    container_name: bomb
+  bot_bomb:
+    container_name: bot_bomb
     tty: true
     build:
       context: .
