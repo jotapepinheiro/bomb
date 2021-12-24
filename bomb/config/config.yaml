@@ -170,7 +170,7 @@
   #
   # [pt_BR] mostra emojis no console 
   # Valor padrão: false
-  emoji: True
+  emoji: False
 
   # [en_US] show more information
   # Default value: false

@@ -728,7 +728,7 @@ def getMoreHeroes():
             empty_scrolls_attempts = empty_scrolls_attempts - 1
             scroll()
         sleep(1, 3)
-    logger('{} total heroes sent since the bot started'.format(heroes_clicked_total), telegram=True, emoji='🦸')
+    logger('{} total heroes sent since the bot started'.format(heroes_clicked_total), telegram=False, emoji='🦸')
     goToTreasureHunt()
 
 
@@ -810,7 +810,7 @@ def main():
 
     input('Press Enter to start the bot...\n')
     logger('Starting bot...', telegram=True, emoji='🤖')
-    logger('Commands: \n\n /print \n /map \n /bcoin \n /refresh \n /invite \n /id \n', telegram=True, emoji='ℹ️')
+    logger('Commands: \n\n /print \n /map \n /bcoin \n /refresh \n /stop \n /id \n', telegram=True, emoji='ℹ️')
 
     browser = 0
     last = [
