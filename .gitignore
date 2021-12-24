@@ -1,2 +1,6 @@
 .DS_Store
 /bomb/config/telegram.yaml
+
+/bomb/logs/bcoin-report.jpg
+/bomb/logs/print-report.jpg
+/bomb/src/__pycache__/date.cpython-38.pyc

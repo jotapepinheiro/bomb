@@ -23,7 +23,7 @@ services:
       - PASSWORD=123mudar
     volumes:
        - /dev/shm:/dev/shm
-       - ./bomb:/home/ubuntu/Desktop/bomb:ro
+       - ./bomb:/home/ubuntu/Desktop/bomb:rw
     ports:
       - 5900:5900
       - 6080:80
