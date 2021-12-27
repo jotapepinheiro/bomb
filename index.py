@@ -7,7 +7,6 @@ from numpy.random.mtrand import beta
 from telegram import Update, message
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from PIL import Image
-from CaptchaSolver import captcha_solver
 
 import pytesseract as ocr
 import numpy as np
@@ -343,155 +342,6 @@ def getAccount():
         return "CONTA 2"
     else:
         return "CONTA 1"
-
-
-def alertCaptcha():
-    current = printScreen()
-    popup_pos = positions(robot, threshold=ct['default'], img=current)
-
-    # cv2.imshow('img', current)
-    # cv2.waitKey(0)
-
-    if len(popup_pos) == 0:
-        logger('Captcha box não encontrado')
-        return "not-found"
-
-    account = getAccount()
-
-    test = telegram_bot_sendtext(f'⚠️ ATENÇÃO! RESOLVER CAPTCHA...\n\n 🧩 {account} DO {d_telegram["telegram_user_name"]}')
-    logger('Captcha detectado!')
-
-    slider_start_pos = getSliderPosition()
-    if slider_start_pos is None:
-        logger('Posição do slider do captcha não encontrado')
-        return
-
-    # tentativa de ler o ocr
-
-    if (current_account > 1 and c['usage_multi_account']):
-        captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] + c['screen_width'] - 50, popup_pos[0][1] + 140, popup_pos[0][2] - 50, popup_pos[0][3]*2))
-    else:
-        captcha_scshot = pyautogui.screenshot(region=(popup_pos[0][0] - 50, popup_pos[0][1] + 140, popup_pos[0][2] - 50, popup_pos[0][3]*2))
-
-    img_captcha_dir = os.path.dirname(os.path.realpath(__file__)) + r'/targets/captcha1.png'
-    captcha_scshot.save(img_captcha_dir)
-    img = trataImgCaptcha(img_captcha_dir)
-
-    captchaValue = ocr.image_to_string(img, lang='BombFont')
-    captchaValue = re.sub("[^\d\.]", "", captchaValue)
-
-    slider_mov = 40
-    slider_size = positions(images['slider_size_1'], threshold=0.9)
-
-    # obten o quanto de pixels o ponteiro tem que arrastar de acordo com o tamanho do slider que aparece
-    # o número de repetições é a quantidade de imagens do slider-size que tenho + 1
-    numero_sliders = 8
-    for i in range(1, numero_sliders):
-        slider_size = positions(images[f'slider_size_{i}'], threshold=0.9)
-        if(len(slider_size) > 0):
-            slider_mov = slider_mov + (10 * i)
-            break
-        time.sleep(1)
-
-    if(len(slider_size) == 0):
-        logger('Tamanho do slider do captcha não encontrado!')
-        return
-
-    slider_positions = []
-    x, y = slider_start_pos
-    cp = captcha_solver.CaptchaSolver()
-    trainingPyTorch = os.path.dirname(os.path.realpath(__file__)) + r'/CaptchaSolver/bomb_captcha.pt' 
-    cp.initModel(trainingPyTorch, 'CaptchaSolver')
-    for i in range(5):
-        if i == 0:
-            # pyautogui.moveTo(x, y, 1)
-            randomMouseMovement(False, x, y)
-            pyautogui.mouseDown()
-
-            # faz o primeiro movimento e volta para abrir o primeiro item
-            pyautogui.moveTo(x + slider_mov, y, 0.15)
-            pyautogui.moveTo(x, y, 1)
-            slider_positions.append((x, y))
-        else:
-            slider_start_pos = getSliderPosition()
-            x, y = slider_start_pos
-            pyautogui.moveTo(x, y, 0.15)
-            # time.sleep(0.5)
-
-            slider_positions.append((x + slider_mov, y))
-            pyautogui.moveTo(x + slider_mov, y, 0.15)
-
-        time.sleep(0.5)
-        # encontra a posição do captcha inteiro
-
-        if (current_account > 1 and c['usage_multi_account']):
-            captcha_scshot = pyautogui.screenshot(region=(
-                popup_pos[0][0] + c['screen_width'] - 120, popup_pos[0][1] + 80, popup_pos[0][2]*1.9, popup_pos[0][3]*8.3))
-        else:
-            captcha_scshot = pyautogui.screenshot(region=(
-                popup_pos[0][0] - 120, popup_pos[0][1] + 80, popup_pos[0][2]*1.9, popup_pos[0][3]*8.3))
-
-        img_captcha_dir = os.path.dirname(os.path.realpath(__file__)) + r'/targets/captcha1.png'
-        captcha_scshot.save(img_captcha_dir)
-
-        img = cv2.imread(img_captcha_dir)
-        time.sleep(0.5)
-
-        try:
-            resultado = cp.SolveCaptcha(img, trainingPyTorch, 0.7, dir='CaptchaSolver')
-        except:
-            logger(f'⛔ Erro ao resolver o Captcha.', False, True)
-            return
-
-        if(resultado['Captcha'] == captchaValue):
-            pyautogui.moveTo(slider_positions[-1][0] + 4, slider_positions[-1][1] + 3, 0.5)
-            pyautogui.mouseUp()
-            break
-
-        logger(f'Valor do captcha {captchaValue}, valor da imagem {resultado["Captcha"]}')
-
-        # envia a foto do captcha
-        # telegram_bot_sendtext(f'Imagem /{i + 1}')
-        # telegram_bot_sendphoto(img_captcha_dir)
-
-    # TBotUpdater.stop()
-    # time.sleep(1)
-
-    #logger('Esperando pela resposta do usuário...')
-    #    qtd_messages_sended = len(bot.getUpdates())
-    #    user_response = 0
-    #    # await user to response
-    #    try:
-    #        while True:
-    #            messages_now = bot.getUpdates()
-    #            if len(messages_now) > qtd_messages_sended and messages_now[len(messages_now) -1].message.text.replace('/','').isdigit:
-    #                user_response = int(messages_now[len(messages_now) -1].message.text.replace('/',''))
-    #                break
-    #
-    #            time.sleep(4)
-    #    except:
-    #        logger('Sem resposta do usuário!')
-    #
-    #    if(user_response == 0):
-    #        logger('Sem resposta do usuário!')
-    #        return
-    #
-    #    logger(f"usuario escolheu o numero {user_response}")
-    #
-    #    pyautogui.moveTo(slider_positions[user_response-1][0], slider_positions[user_response-1][1], 0.5)
-    #    pyautogui.moveTo(slider_positions[user_response-1][0] + 4, slider_positions[user_response-1][1] + 3, 0.5)
-    #    # time.sleep(0.5)
-    #    pyautogui.mouseUp()
-
-    # TBotUpdater.start_polling()
-    # time.sleep(2)
-
-    if(len(positions(robot)) == 0):
-        telegram_bot_sendtext('✅ RESOLVIDO!')
-    else:
-        refreshBrowser()
-        telegram_bot_sendtext('🆘 FALHOU!')
-
 
 def dateFormatted(format='%Y-%m-%d %H:%M:%S'):
     datetime = time.localtime()
@@ -929,7 +779,6 @@ def loggerMapClicked():
 
     randomMouseMovement()
     # solveCapcha()
-    alertCaptcha()
     time.sleep(np.random.randint(3, 5))
     sendMapReport()
     randomMouseMovement()
@@ -940,16 +789,11 @@ def goToHeroes():
         global login_attempts
         login_attempts = 0
 
-    # solveCapcha()
-    alertCaptcha()
     time.sleep(np.random.randint(1, 3))
     randomMouseMovement()
     clickBtn(hero_img)
     time.sleep(np.random.randint(1, 3))
     randomMouseMovement()
-    # solveCapcha()
-    alertCaptcha()
-
 
 def goToGame():
     # in case of server overload popup
@@ -998,8 +842,6 @@ def login():
         refreshBrowser()
 
     if clickBtn(connect_wallet_btn_img, name='connectWalletBtn', timeout=10):
-        # solveCapcha()
-        alertCaptcha()
         login_attempts = login_attempts + 1
         logger('🔑 Botão conectar carteira detectado, fazendo login!')
         # TODO mto ele da erro e poco o botao n abre
@@ -1168,7 +1010,6 @@ def main() -> None:
 
         if now - last[browser]["check_for_capcha"] > t['check_for_capcha'] * 60:
             last[browser]["check_for_capcha"] = now
-            alertCaptcha()
             randomMouseMovement()
 
         if now - last[browser]["bcoin_report"] > t['bcoin_report'] * 60:
@@ -1188,7 +1029,6 @@ def main() -> None:
             randomMouseMovement()
 
         if now - last[browser]["refresh_heroes"] > np.random.randint(rhp['init'], rhp['end']) * 60:
-            alertCaptcha()
             last[browser]["refresh_heroes"] = now
             refreshHeroesPositions()
 
