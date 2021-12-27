@@ -805,6 +805,9 @@ def checkThreshold():
         configThreshold = newConfigThreshold
         logger('New Threshold applied', telegram=False, emoji='⚙️')
 
+def time_in_range(start, end, current):
+    return start <= current <= end
+
 def main():
 
     input('Press Enter to start the bot...\n')
@@ -886,7 +889,58 @@ def main():
 
 if __name__ == '__main__':
     try:
-        main()
+        while True:
+            start = datetime.time(22, 0, 0)
+            end = datetime.time(22, 10, 0)
+            current = datetime.datetime.now().time()
+
+            if time_in_range(start, end, current):
+                logger('Sleep mode activated - 2h', emoji='🌚')
+
+                if (close_bombs == True):
+                    time.sleep(5)
+
+                    # clica primeira aba do navegador
+                    pyautogui.click(300, 784)
+                    pyautogui.click(button='right')
+                    pyautogui.click(300, 613)
+
+                    # # clica no botão + do navegador
+                    pyautogui.click(262, 13)
+                    # clica no botão x do navegador
+                    pyautogui.click(231, 13)
+
+                    # clica segunda aba do navegador
+                    pyautogui.click(472, 784)
+                    pyautogui.click(button='right')
+                    pyautogui.click(472, 613)
+
+                    # clica no botão + do navegador
+                    pyautogui.click(262, 13)
+                    # clica no botão x do navegador
+                    pyautogui.click(231, 13)
+                    close_bombs = False
+
+                time.sleep(30)
+
+                # clica segunda aba do navegador
+                pyautogui.click(472, 784)
+                pyautogui.click(button='right')
+                pyautogui.click(472, 613)
+
+                # clica no bombcrypto do navegador
+                pyautogui.click(70, 310)
+
+                # clica primeira aba do navegador
+                pyautogui.click(300, 784)
+                pyautogui.click(button='right')
+                pyautogui.click(300, 613)
+
+                # clica no bombcrypto do navegador
+                pyautogui.click(70, 310)
+            else:
+                close_bombs = True
+                main()
     except KeyboardInterrupt:
         logger('Shutting down the bot', telegram=True, emoji='😓')
         if(updater):

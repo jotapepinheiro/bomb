@@ -15,9 +15,12 @@ bomb-shell: ## Acessar container bomb
 	docker container exec -it bot_bomb bash
 
 ## —— SSH 🎶 ———————————————————————————————————————————————————————————————
-bomb-ssh: ## Enviar comando para bomb
+init-bot: ## Enviar comando para bomb
 	docker-compose exec bot_bomb sh -c "cd /home/ubuntu/Desktop/bomb \
 	&& python3 index.py"
+
+open-brave: ## Enviar comando para bomb
+	docker-compose exec bot_bomb sh -c "brave-browser google.com"
 
 ## —— Outros 🛠️️ ———————————————————————————————————————————————————————————————
 
