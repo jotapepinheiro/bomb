@@ -863,6 +863,8 @@ def main():
         if now - last[browser]["check_updates"] > check_for_updates * 60:
             last[browser]["check_updates"] = now
 
+        sleep(5, 10)
+
         if multi_account == True:
             browser = 1 if browser == 0 else 0
             if browser == 0:
@@ -873,15 +875,10 @@ def main():
                 pyautogui.moveTo(472, 784, 1)
                 pyautogui.click()
 
-        time.sleep(1)
-
         checkLogout()
         sys.stdout.flush()
         time.sleep(general_check_time)
         checkThreshold()
-
-        pyautogui.moveTo(400, 790, 1)
-        time.sleep(1)
 
 
 if __name__ == '__main__':
