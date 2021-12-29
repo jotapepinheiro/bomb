@@ -39,7 +39,7 @@
   # [pt_BR] Configs da metamask
   #
   metamask:
-    enable_login_metamask: false
+    enable_login_metamask: False
     password: "METAMASK PASSWORD"
 
   # [en_US] How confident the bot needs to be to click the buttons (values from 0 to 1. 0 is the minimum value, 1 is the maximum value)
@@ -80,7 +80,7 @@
     #
     # [pt_BR]
     # Valor padrão: 0.8
-    green_bar: 0.8
+    green_bar: 0.9
 
     # [en_US]
     # Default value: 0.7
@@ -111,21 +111,21 @@
   #
   # [pt_BR]
   # Valor padrão: 60
-  scroll_size: 60
+  scroll_size: 200
 
   # [en_US]
   # Default value: 3
   #
   # [pt_BR]
   # Valor padrão: 3
-  scroll_attempts: 3
+  scroll_attempts: 8
 
   # [en_US]
   # Default value: true
   #
   # [pt_BR]
   # Valor padrão: true
-  use_click_and_drag_instead_of_scroll: true
+  use_click_and_drag_instead_of_scroll: False
 
   # [en_US]
   # Default value: 200

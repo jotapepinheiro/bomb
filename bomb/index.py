@@ -62,8 +62,8 @@ except FileNotFoundError:
 hc = HumanClicker()
 pyautogui.PAUSE = streamConfig['time_intervals']['interval_between_movements']
 pyautogui.FAILSAFE = False
-general_check_time = 1
-check_for_updates = 15
+general_check_time = 5
+check_mult = 2
 
 multi_account = True
 heroes_clicked = 0
@@ -811,6 +811,7 @@ def main():
     logger('Starting bot...', telegram=True, emoji='🤖')
     logger('Commands: \n\n /print \n /map \n /bcoin \n /refresh \n /id \n', telegram=True, emoji='ℹ️')
 
+    time.sleep(3)
     browser = 0
     last = [
         {
@@ -818,14 +819,14 @@ def main():
             "heroes": 0,
             "new_map": 0,
             "refresh_heroes": 0,
-            "check_updates": 0
+            "check_mult": 0
         },
         {
             "login": 0,
             "heroes": 0,
             "new_map": 0,
             "refresh_heroes": 0,
-            "check_updates": 0
+            "check_mult": 0
         }
     ]
 
@@ -860,20 +861,18 @@ def main():
             last[browser]["refresh_heroes"] = now
             refreshHeroesPositions()
 
-        if now - last[browser]["check_updates"] > check_for_updates * 60:
-            last[browser]["check_updates"] = now
+        if now - last[browser]["check_mult"] > check_mult * 60:
+            if multi_account == True:
+                browser = 1 if browser == 0 else 0
+                if browser == 0:
+                    pyautogui.moveTo(300, 784, 1)
+                    pyautogui.click()
+                    
+                if browser == 1:
+                    pyautogui.moveTo(472, 784, 1)
+                    pyautogui.click()
 
-        sleep(5, 10)
-
-        if multi_account == True:
-            browser = 1 if browser == 0 else 0
-            if browser == 0:
-                pyautogui.moveTo(300, 784, 1)
-                pyautogui.click()
-
-            if browser == 1:
-                pyautogui.moveTo(472, 784, 1)
-                pyautogui.click()
+                last[browser]["check_mult"] = now
 
         checkLogout()
         sys.stdout.flush()
