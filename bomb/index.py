@@ -863,16 +863,24 @@ def main():
 
         if now - last[browser]["check_mult"] > check_mult * 60:
             if multi_account == True:
-                browser = 1 if browser == 0 else 0
                 if browser == 0:
                     pyautogui.moveTo(300, 784, 1)
                     pyautogui.click()
+                    browser = 1
+                    time.sleep(5)
+                    continue
                     
                 if browser == 1:
-                    pyautogui.moveTo(472, 784, 1)
+                    pyautogui.moveTo(470, 784, 1)
                     pyautogui.click()
+                    browser = 0
+                    time.sleep(5)
+                    continue
 
                 last[browser]["check_mult"] = now
+        
+        pyautogui.moveTo(512, 750, 1)
+        time.sleep(8)
 
         checkLogout()
         sys.stdout.flush()
