@@ -894,7 +894,7 @@ def main():
                     hc.move((int(35), int(127)), np.random.randint(1, 2))
                     pyautogui.click()
                     time.sleep(1)
-                    hc.move((int(194), int(330)), np.random.randint(1, 2))
+                    hc.move((int(194), int(495)), np.random.randint(1, 2))
                     pyautogui.click()
                     time.sleep(1)
                     clickButton(x_button_img)
