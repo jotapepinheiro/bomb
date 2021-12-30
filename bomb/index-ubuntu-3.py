@@ -62,8 +62,7 @@ except FileNotFoundError:
 hc = HumanClicker()
 pyautogui.PAUSE = streamConfig['time_intervals']['interval_between_movements']
 pyautogui.FAILSAFE = False
-general_check_time = 5
-check_mult = 2
+general_check_time = 8
 
 heroes_clicked = 0
 heroes_clicked_total = 0
@@ -817,24 +816,21 @@ def main():
             "login": 0,
             "heroes": 0,
             "new_map": 0,
-            "refresh_heroes": 0,
-            "check_mult": 0
+            "refresh_heroes": 0
         },
         {
             "conta": 2,
             "login": 0,
             "heroes": 0,
             "new_map": 0,
-            "refresh_heroes": 0,
-            "check_mult": 0
+            "refresh_heroes": 0
         },
         {
             "conta": 3,
             "login": 0,
             "heroes": 0,
             "new_map": 0,
-            "refresh_heroes": 0,
-            "check_mult": 0
+            "refresh_heroes": 0
         }
     ]
 
@@ -871,35 +867,32 @@ def main():
                 last["refresh_heroes"] = now
                 refreshHeroesPositions()
 
-            if now - last["check_mult"] > check_mult * 60:
-                if last["conta"] == 1:
-                    hc.move((int(35), int(127)), np.random.randint(1, 2))
-                    pyautogui.click()
-                    time.sleep(1)
-                    hc.move((int(194), int(135)), np.random.randint(1, 2))
-                    pyautogui.click()
-                    time.sleep(1)
-                    clickButton(x_button_img)
-                    
-                if last["conta"] == 2:
-                    hc.move((int(35), int(127)), np.random.randint(1, 2))
-                    pyautogui.click()
-                    time.sleep(1)
-                    hc.move((int(194), int(330)), np.random.randint(1, 2))
-                    pyautogui.click()
-                    time.sleep(1)
-                    clickButton(x_button_img)
+            if last["conta"] == 1:
+                hc.move((int(35), int(127)), np.random.randint(1, 2))
+                pyautogui.click()
+                time.sleep(1)
+                hc.move((int(194), int(135)), np.random.randint(1, 2))
+                pyautogui.click()
+                time.sleep(1)
+                clickButton(x_button_img)
+                
+            if last["conta"] == 2:
+                hc.move((int(35), int(127)), np.random.randint(1, 2))
+                pyautogui.click()
+                time.sleep(1)
+                hc.move((int(194), int(330)), np.random.randint(1, 2))
+                pyautogui.click()
+                time.sleep(1)
+                clickButton(x_button_img)
 
-                if last["conta"] == 3:
-                    hc.move((int(35), int(127)), np.random.randint(1, 2))
-                    pyautogui.click()
-                    time.sleep(1)
-                    hc.move((int(194), int(495)), np.random.randint(1, 2))
-                    pyautogui.click()
-                    time.sleep(1)
-                    clickButton(x_button_img)
-
-                last["check_mult"] = now
+            if last["conta"] == 3:
+                hc.move((int(35), int(127)), np.random.randint(1, 2))
+                pyautogui.click()
+                time.sleep(1)
+                hc.move((int(194), int(495)), np.random.randint(1, 2))
+                pyautogui.click()
+                time.sleep(1)
+                clickButton(x_button_img)
 
             checkLogout()
             sys.stdout.flush()
