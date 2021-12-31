@@ -803,6 +803,15 @@ def checkThreshold():
         configThreshold = newConfigThreshold
         logger('New Threshold applied', telegram=False, emoji='⚙️')
 
+def alterAccount(by):
+    hc.move((int(35), int(125)), np.random.randint(1, 2))
+    pyautogui.click()
+    time.sleep(1)
+    hc.move((int(195), int(by)), np.random.randint(1, 2))
+    pyautogui.click()
+    time.sleep(1)
+    clickButton(x_button_img)
+
 def main():
 
     input('Press Enter to start the bot...\n')
@@ -835,20 +844,33 @@ def main():
     ]
 
     while True:
-        now = time.time()
+        if currentScreen() == "login":
+            login()
+
+        handleError()
 
         for last in accounts:
+            
+            if last["conta"] == 1:
+                alterAccount(135)
+                
+            if last["conta"] == 2:
+                alterAccount(330)
 
-            if currentScreen() == "login":
-                login()
+            if last["conta"] == 3:
+                alterAccount(495)
 
-            handleError()
+            sleep(1, 2)
+
+            now = time.time()
 
             if now - last["heroes"] > next_refresh_heroes * 60:
                 last["heroes"] = now
                 last["refresh_heroes"] = now
                 getMoreHeroes()
-
+            
+            sleep(1, 2)
+            
             if currentScreen() == "main":
                 if clickButton(teasureHunt_icon_img):
                     logger('Entering treasure hunt', emoji='▶️')
@@ -866,33 +888,6 @@ def main():
             if now - last["refresh_heroes"] > next_refresh_heroes_positions * 60:
                 last["refresh_heroes"] = now
                 refreshHeroesPositions()
-
-            if last["conta"] == 1:
-                hc.move((int(35), int(127)), np.random.randint(1, 2))
-                pyautogui.click()
-                time.sleep(1)
-                hc.move((int(194), int(135)), np.random.randint(1, 2))
-                pyautogui.click()
-                time.sleep(1)
-                clickButton(x_button_img)
-                
-            if last["conta"] == 2:
-                hc.move((int(35), int(127)), np.random.randint(1, 2))
-                pyautogui.click()
-                time.sleep(1)
-                hc.move((int(194), int(330)), np.random.randint(1, 2))
-                pyautogui.click()
-                time.sleep(1)
-                clickButton(x_button_img)
-
-            if last["conta"] == 3:
-                hc.move((int(35), int(127)), np.random.randint(1, 2))
-                pyautogui.click()
-                time.sleep(1)
-                hc.move((int(194), int(495)), np.random.randint(1, 2))
-                pyautogui.click()
-                time.sleep(1)
-                clickButton(x_button_img)
 
             checkLogout()
             sys.stdout.flush()
