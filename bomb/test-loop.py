@@ -34,32 +34,35 @@ accounts = [
 ]
 
 while True:
-        now = time.time()
+        
 
         for last in accounts:
 
-            if now - last["time"]["heroes"] > 1 * 60:
-                last["time"]["heroes"] = now
-                last["time"]["refresh_heroes"] = now
-                print('[{}] Heroes and Refresh heroes'.format(last["conta"]))
-
-            if now - last["time"]["refresh_heroes"] > 1 * 60:
-                last["time"]["refresh_heroes"] = now
-                print('[{}] Refresh heroes'.format(last["conta"]))
-
-            #if now - last["time"]["check_mult"] > 1 * 60:
             if last["conta"] == 1:
                 print('[{}] check mult'.format(last["conta"]))
-                last["time"]["check_mult"] = now
 
             if last["conta"] == 2:
                 print('[{}] check mult'.format(last["conta"]))
-                last["time"]["check_mult"] = now
 
             if last["conta"] == 3:
                 print('[{}] check mult'.format(last["conta"]))
-                last["time"]["check_mult"] = now
-            
+
+            i = 1
+            while i < 6:
+                now = time.time()
+
+                if now - last["time"]["heroes"] > 1 * 60:
+                    last["time"]["heroes"] = now
+                    last["time"]["refresh_heroes"] = now
+                    print('[{}] Heroes and Refresh heroes'.format(last["conta"]))
+
+                if now - last["time"]["refresh_heroes"] > 1 * 60:
+                    last["time"]["refresh_heroes"] = now
+                    print('[{}] Refresh heroes'.format(last["conta"]))
+
+                print('[{}] Counter'.format(i)) 
+                i += 1
+
             print('############################################################')
             #print('[{}] farmando'.format(last["conta"]))
             time.sleep(3)
