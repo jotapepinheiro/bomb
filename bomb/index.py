@@ -812,23 +812,14 @@ def main():
     logger('Commands: \n\n /print \n /map \n /bcoin \n /refresh \n /id \n', telegram=True, emoji='ℹ️')
 
     time.sleep(3)
-    browser = 0
-    last = [
-        {
-            "login": 0,
-            "heroes": 0,
-            "new_map": 0,
-            "refresh_heroes": 0,
-            "check_mult": 0
-        },
-        {
+ 
+    last = {
             "login": 0,
             "heroes": 0,
             "new_map": 0,
             "refresh_heroes": 0,
             "check_mult": 0
         }
-    ]
 
     while True:
         now = time.time()
@@ -838,49 +829,28 @@ def main():
 
         handleError()
 
-        if now - last[browser]["heroes"] > next_refresh_heroes * 60:
-            last[browser]["heroes"] = now
-            last[browser]["refresh_heroes"] = now
+        if now - last["heroes"] > next_refresh_heroes * 60:
+            last["heroes"] = now
+            last["refresh_heroes"] = now
             getMoreHeroes()
 
         if currentScreen() == "main":
             if clickButton(teasureHunt_icon_img):
                 logger('Entering treasure hunt', emoji='▶️')
-                last[browser]["refresh_heroes"] = now
+                last["refresh_heroes"] = now
 
         if currentScreen() == "thunt":
             if clickButton(new_map_btn_img):
-                last[browser]["new_map"] = now
+                last["new_map"] = now
                 clickNewMap()
 
         if currentScreen() == "character":
             clickButton(x_button_img)
             sleep(1, 3)
 
-        if now - last[browser]["refresh_heroes"] > next_refresh_heroes_positions * 60:
-            last[browser]["refresh_heroes"] = now
+        if now - last["refresh_heroes"] > next_refresh_heroes_positions * 60:
+            last["refresh_heroes"] = now
             refreshHeroesPositions()
-
-        if now - last[browser]["check_mult"] > check_mult * 60:
-            if multi_account == True:
-                if browser == 0:
-                    pyautogui.moveTo(300, 784, 1)
-                    pyautogui.click()
-                    browser = 1
-                    time.sleep(5)
-                    continue
-                    
-                if browser == 1:
-                    pyautogui.moveTo(470, 784, 1)
-                    pyautogui.click()
-                    browser = 0
-                    time.sleep(5)
-                    continue
-
-                last[browser]["check_mult"] = now
-        
-        pyautogui.moveTo(512, 750, 1)
-        time.sleep(8)
 
         checkLogout()
         sys.stdout.flush()
