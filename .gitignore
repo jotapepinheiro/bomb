@@ -1,16 +1,7 @@
-# MacOS
 .DS_Store
+/bomb/config/telegram.yaml
 
-# IDE
-.vim
-
-# log
-/logs/new-map.log
-/logs/logger.log
-/logs/map-report.png
-/logs/bcoin-report.png
-/logs/captcha.png
-/number.png
-/dev.txt
-/logs/print-report.jpg
-/targets/captcha1.png
+/bomb/logs/bcoin-report.jpg
+/bomb/logs/print-report.jpg
+/bomb/src/__pycache__/date.cpython-38.pyc
+/bomb/logs/map-report.jpg

@@ -1,0 +1,7 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory `/Users/joaopinheiro/Dev/NFT/bombDocker'
+grep -E '(^[a-zA-Z_-]+:.*?##.*$)|(^##)'  makefile \
+	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[32m%-24s\033[0m %s\n", $1, $2}' \
+	| sed -e 's/\[32m## /[33m/' && printf "\n"
+make: Leaving directory `/Users/joaopinheiro/Dev/NFT/bombDocker'
+ 
