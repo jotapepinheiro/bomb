@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from cv2 import cv2
 
-from captcha.solveCaptcha import solveCaptcha
-
 from os import listdir
 from src.logger import logger, loggerMapClicked
 from random import randint
 from random import random
+
+from src.date import dateFormatted, timeFormatted
 
 import numpy as np
 import mss
@@ -57,10 +57,6 @@ if __name__ == '__main__':
 
 ct = c['threshold']
 ch = c['home']
-
-if not ch['enable']:
-    print('>>---> Home feature not enabled')
-print('\n')
 
 pyautogui.PAUSE = c['time_intervals']['interval_between_moviments']
 
@@ -506,45 +502,21 @@ def main():
     while True:
         now = time.time()
 
-        if now - last[browser]["check_for_captcha"] > addRandomness(t['check_for_captcha'] * 60):
-            last[browser]["check_for_captcha"] = now
-            solveCaptcha()
+        formatted_time = timeFormatted()
 
-        if now - last[browser]["heroes"] > addRandomness(t['send_heroes_for_work'] * 60):
-            last[browser]["heroes"] = now
-            refreshHeroes()
+        logger(formatted_time)
 
-        if now - last[browser]["login"] > addRandomness(t['check_for_login'] * 60):
-            sys.stdout.flush()
-            last[browser]["login"] = now
-            login()
+        if formatted_time > '11:40:00' and formatted_time < '12:00:00':
+            logger('🌚 Sleep mode activated')
+            time.sleep(30)
+        else:
+            logger('🤖 Switching else')
 
-        if now - last[browser]["new_map"] > t['check_for_new_map_button']:
-            last[browser]["new_map"] = now
+        # if now - last[browser]["check_for_captcha"] > addRandomness(t['check_for_captcha'] * 60):
+        #     last[browser]["check_for_captcha"] = now
+        #     solveCaptcha()
 
-            if clickBtn(images['new-map']):
-                loggerMapClicked()
-
-        if now - last[browser]["refresh_heroes"] > addRandomness(t['refresh_heroes_positions'] * 60):
-            solveCaptcha()
-            last[browser]["refresh_heroes"] = now
-            refreshHeroesPositions()
-
-        browser_list = positions(navigator_img, threshold=ct['default'])
-        if len(browser_list) > 1:
-            logger('Trocando de browser')
-            browser = 1 if browser == 0 else 0
-            x, y, w, h = browser_list[browser]
-            pyautogui.moveTo(x+w/2, y+h/2, 1)
-            pyautogui.click()
-            time.sleep(1)
-
-        # clickBtn(teasureHunt)
-        logger(None, progress_indicator=True)
-
-        sys.stdout.flush()
-
-        time.sleep(1)
+        # time.sleep(3)
 
 
 main()
