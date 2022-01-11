@@ -90,10 +90,6 @@ character_indicator = cv2.imread('./images/targets/character_indicator.png')
 error_img = cv2.imread('./images/targets/error.png')
 metamask_unlock_img = cv2.imread('./images/targets/unlock_metamask.png')
 metamask_cancel_button = cv2.imread('./images/targets/metamask_cancel_button.png')
-puzzle_img = cv2.imread('./images/targets/puzzle.png')
-piece = cv2.imread('./images/targets/piece.png')
-robot = cv2.imread('./images/targets/robot.png')
-slider = cv2.imread('./images/targets/slider.png')
 chest_button = cv2.imread('./images/targets/treasure_chest.png')
 coin_icon = cv2.imread('./images/targets/coin.png')
 maintenance_popup = cv2.imread('./images/targets/maintenance.png')
@@ -101,15 +97,6 @@ chest1 = cv2.imread('./images/targets/chest1.png')
 chest2 = cv2.imread('./images/targets/chest2.png')
 chest3 = cv2.imread('./images/targets/chest3.png')
 chest4 = cv2.imread('./images/targets/chest4.png')
-brave_crash = cv2.imread('./images/targets/brave_crash.png')
-brave_navigator = cv2.imread('./images/targets/brave_navigator.png')
-
-
-def braveCrashCheck():
-    if positions(brave_crash):
-        logger('Brave failed, Refresh navigation', emoji='🤖')
-        pyautogui.hotkey('ctrl', 'shift', 'r')
-
 
 def refreshNavigation():
     logger('Refresh navigation', emoji='🤖')
@@ -462,7 +449,7 @@ def clickButtons():
         heroes_clicked_total = heroes_clicked_total + 1
         # cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
         if heroes_clicked > 15:
-            logger('Too many hero clicks, try to increase the go_to_work_btn threshold', telegram=True, emoji='⚠️')
+            logger('Too many hero clicks, try to increase the go_to_work_btn threshold', telegram=True, emoji='🆘')
             return
         sleep(1, 3)
     logger('Clicking in %d heroes detected.' % len(buttons), telegram=False, emoji='👆')
@@ -510,7 +497,7 @@ def clickGreenBarButtons():
         global heroes_clicked
         heroes_clicked_total = heroes_clicked_total + 1
         if heroes_clicked > 15:
-            logger('Too many hero clicks, try to increase the go_to_work_btn threshold', telegram=True, emoji='⚠️')
+            logger('Too many hero clicks, try to increase the go_to_work_btn threshold', telegram=True, emoji='🆘')
             return
         # cv2.rectangle(sct_img, (x, y) , (x + w, y + h), (0,255,255),2)
         sleep(1, 3)
@@ -546,7 +533,7 @@ def clickFullBarButtons():
         global heroes_clicked
         heroes_clicked_total = heroes_clicked_total + 1
         if heroes_clicked > 15:
-            logger('Too many hero clicks, try to increase the go_to_work_btn threshold', telegram=True, emoji='⚠️')
+            logger('Too many hero clicks, try to increase the go_to_work_btn threshold', telegram=True, emoji='🆘')
             return
         sleep(1, 3)
     return len(not_working_full_bars)
@@ -639,12 +626,12 @@ def login():
             logger('Unlock button clicked', emoji='🔓')
 
     if clickButton(sign_btn_img):
-        logger('Found sign button. Waiting to check if logged in', emoji='✔️')
+        logger('Found sign button. Waiting to check if logged in', emoji='✅')
         time.sleep(5)
         if clickButton(sign_btn_img):  # twice because metamask glitch
-            logger('Found glitched sign button. Waiting to check if logged in', emoji='✔️')
+            logger('Found glitched sign button. Waiting to check if logged in', emoji='✅')
         # time.sleep(25)
-        waitForImage(teasureHunt_icon_img, timeout=30)
+        waitForImage(teasureHunt_icon_img, timeout=120)
         handleError()
 
     if currentScreen() == "main":
@@ -694,11 +681,11 @@ def getMoreHeroes():
     goToHeroes()
 
     if streamConfig['select_heroes_mode'] == "full":
-        logger('Sending heroes with full stamina bar to work!', emoji='⚒️')
+        logger('Sending heroes with full stamina bar to work!', emoji='💪🏻')
     elif streamConfig['select_heroes_mode'] == "green":
-        logger('Sending heroes with green stamina bar to work!', emoji='⚒️')
+        logger('Sending heroes with green stamina bar to work!', emoji='💪🏻')
     else:
-        logger('Sending all heroes to work!', emoji='⚒️')
+        logger('Sending all heroes to work!', emoji='💪🏻')
 
     buttonsClicked = 0
     heroes_clicked = 0
@@ -741,7 +728,7 @@ def checkLogout():
             waitForImage(connect_wallet_btn_img)
             login()
         elif positions(sign_btn_img):
-            logger('Sing button detected', telegram=True, emoji='✔️')
+            logger('Sing button detected', telegram=True, emoji='😿')
             if clickButton(metamask_cancel_button):
                 logger('Metamask is glitched, fixing', telegram=True, emoji='🙀')
         else:
@@ -774,7 +761,7 @@ def waitForImage(imgs, timeout=30, threshold=0.5, multiple=False):
 
 
 def clickNewMap():
-    logger('New map', emoji='🗺️')
+    logger('New map', emoji='🗺')
     sleep(1, 2)
     sleep(2, 3)
     sendMapReport()
@@ -801,13 +788,13 @@ def checkThreshold():
 
     if newConfigThreshold != configThreshold:
         configThreshold = newConfigThreshold
-        logger('New Threshold applied', telegram=False, emoji='⚙️')
+        logger('New Threshold applied', telegram=False, emoji='🔄')
 
 def alterAccount(by):
-    hc.move((int(35), int(125)), np.random.randint(1, 2))
+    hc.move((int(36), int(58)), np.random.randint(1, 2))
     pyautogui.click()
     time.sleep(1)
-    hc.move((int(195), int(by)), np.random.randint(1, 2))
+    hc.move((int(200), int(by)), np.random.randint(1, 2))
     pyautogui.click()
     time.sleep(1)
     clickButton(x_button_img)
@@ -816,7 +803,7 @@ def main():
 
     input('Press Enter to start the bot...\n')
     logger('Starting bot...', telegram=True, emoji='🤖')
-    logger('Commands: \n\n /print \n /map \n /bcoin \n /refresh \n /id \n', telegram=True, emoji='ℹ️')
+    logger('Commands: \n\n /print \n /map \n /bcoin \n /refresh \n /id \n', telegram=True, emoji='🤖')
 
     time.sleep(3)
     accounts = [
@@ -840,6 +827,13 @@ def main():
             "heroes": 0,
             "new_map": 0,
             "refresh_heroes": 0
+        },
+        {
+            "conta": 4,
+            "login": 0,
+            "heroes": 0,
+            "new_map": 0,
+            "refresh_heroes": 0
         }
     ]
 
@@ -852,13 +846,16 @@ def main():
         for last in accounts:
             
             if last["conta"] == 1:
-                alterAccount(135)
+                alterAccount(120)
                 
             if last["conta"] == 2:
-                alterAccount(330)
+                alterAccount(302)
 
             if last["conta"] == 3:
-                alterAccount(495)
+                alterAccount(460)
+
+            if last["conta"] == 4:
+                alterAccount(650)
 
             sleep(1, 2)
 
