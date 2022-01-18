@@ -59,7 +59,7 @@
     #
     # [pt_BR]
     # Valor padrão: 0.5
-    error: 0.7
+    error: 0.6
 
     # [en_US]
     # Default value: 0.8
