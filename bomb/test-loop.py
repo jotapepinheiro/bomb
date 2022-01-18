@@ -1,68 +1,40 @@
 import time
 
-accounts = [
-    {
-        "conta": 1,
-        "time": {
-            "login": 0,
-            "heroes": 0,
-            "new_map": 0,
-            "refresh_heroes": 0,
-            "check_mult": 0
-        }
-    },
-    {
-        "conta": 2,
-        "time": {
-            "login": 0,
-            "heroes": 0,
-            "new_map": 0,
-            "refresh_heroes": 0,
-            "check_mult": 0
-        }
-    },
-    {
-        "conta": 3,
-        "time": {
-            "login": 0,
-            "heroes": 0,
-            "new_map": 0,
-            "refresh_heroes": 0,
-            "check_mult": 0
-        }
-    }
-]
+totalAccounts = 4
+accounts = []
+counterAccounts = 1
+while counterAccounts <= totalAccounts : 
+    accounts.append({
+        "login": 0,
+        "heroes": 0,
+        "new_map": 0,
+        "refresh_heroes": 0
+    })
+    counterAccounts += 1
 
 while True:
+
+    curretAccount = 1
+    clickWindow = 120
+    for last in accounts:
+
+        print('[{}] curret account'.format(curretAccount))
+        print('[{}] window'.format(clickWindow))
+
+        now = time.time()
+
+        if now - last["heroes"] > 1 * 60:
+            last["heroes"] = now
+            last["refresh_heroes"] = now
+            print('[{}] Heroes and Refresh heroes'.format(curretAccount))
+
+        if now - last["refresh_heroes"] > 1 * 60:
+            last["refresh_heroes"] = now
+            print('[{}] Refresh heroes'.format(curretAccount))
+
+        print('############################################################')
         
+        clickWindow += 180
+        curretAccount += 1
 
-        for last in accounts:
-
-            if last["conta"] == 1:
-                print('[{}] check mult'.format(last["conta"]))
-
-            if last["conta"] == 2:
-                print('[{}] check mult'.format(last["conta"]))
-
-            if last["conta"] == 3:
-                print('[{}] check mult'.format(last["conta"]))
-
-            i = 1
-            while i < 6:
-                now = time.time()
-
-                if now - last["time"]["heroes"] > 1 * 60:
-                    last["time"]["heroes"] = now
-                    last["time"]["refresh_heroes"] = now
-                    print('[{}] Heroes and Refresh heroes'.format(last["conta"]))
-
-                if now - last["time"]["refresh_heroes"] > 1 * 60:
-                    last["time"]["refresh_heroes"] = now
-                    print('[{}] Refresh heroes'.format(last["conta"]))
-
-                print('[{}] Counter'.format(i)) 
-                i += 1
-
-            print('############################################################')
-            #print('[{}] farmando'.format(last["conta"]))
-            time.sleep(3)
+        time.sleep(3)

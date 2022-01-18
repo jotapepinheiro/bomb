@@ -9,7 +9,7 @@
 # [pt_BR] Inicie uma conversa no Telegram com @botfather e digite /newbot para pegar o your_telegram_bot_token.
 
 telegram_enable: True
-telegram_chat_id: ["-634132691"]
+telegram_chat_id: ["168801094"] #"-634132691"
 telegram_bot_token: "5012946802:AAF39oQO7QB0oOWfdU_9uBzabz49gwqNn1I"
 enable_coin_report: True
 enable_map_report: True

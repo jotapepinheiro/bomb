@@ -59,7 +59,7 @@
     #
     # [pt_BR]
     # Valor padrão: 0.5
-    error: 0.5
+    error: 0.7
 
     # [en_US]
     # Default value: 0.8
@@ -111,21 +111,21 @@
   #
   # [pt_BR]
   # Valor padrão: 60
-  scroll_size: 200
+  scroll_size: 60
 
   # [en_US]
   # Default value: 3
   #
   # [pt_BR]
   # Valor padrão: 3
-  scroll_attempts: 8
+  scroll_attempts: 7
 
   # [en_US]
   # Default value: true
   #
   # [pt_BR]
   # Valor padrão: true
-  use_click_and_drag_instead_of_scroll: False
+  use_click_and_drag_instead_of_scroll: True
 
   # [en_US]
   # Default value: 200
