@@ -105,6 +105,7 @@ chest4 = cv2.imread('./images/targets/chest4.png')
 
 def refreshNavigation():
     refreshHeroesPositions()
+    time.sleep(5)
     logger('Refresh navigation', emoji='🤖')
     pyautogui.hotkey('ctrl', 'shift', 'r')
     time.sleep(5)
@@ -817,6 +818,8 @@ def main():
             login()
 
         handleError()
+
+        sleep(4, 5)
 
         if now - last["heroes"] > next_refresh_heroes * 60:
             last["heroes"] = now
