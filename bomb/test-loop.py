@@ -23,17 +23,22 @@ while True:
 
         now = time.time()
 
-        if now - last["heroes"] > 1 * 60:
-            last["heroes"] = now
-            last["refresh_heroes"] = now
-            print('[{}] Heroes and Refresh heroes'.format(curretAccount))
+        i = 1
+        while i < 4:
+            if now - last["heroes"] > 1 * 60:
+                last["heroes"] = now
+                last["refresh_heroes"] = now
+                print('[{}] Heroes and Refresh heroes'.format(curretAccount))
 
-        if now - last["refresh_heroes"] > 1 * 60:
-            last["refresh_heroes"] = now
-            print('[{}] Refresh heroes'.format(curretAccount))
+            if now - last["refresh_heroes"] > 1 * 60:
+                last["refresh_heroes"] = now
+                print('[{}] Refresh heroes'.format(curretAccount))
+
+            time.sleep(1)
+            i += 1
 
         print('############################################################')
-        
+
         clickWindow += 180
         curretAccount += 1
 

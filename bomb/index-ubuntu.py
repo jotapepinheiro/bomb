@@ -67,6 +67,7 @@ general_check_time = 8
 heroes_clicked = 0
 heroes_clicked_total = 0
 login_attempts = 0
+refresh_page = 60
 next_refresh_heroes = configTimeIntervals['send_heroes_for_work'][0]
 next_refresh_heroes_positions = configTimeIntervals['refresh_heroes_positions'][0]
 
@@ -101,7 +102,10 @@ chest4 = cv2.imread('./images/targets/chest4.png')
 def refreshNavigation():
     logger('Refresh navigation', emoji='🤖')
     pyautogui.hotkey('ctrl', 'shift', 'r')
-
+    time.sleep(5)
+    if clickButton(metamask_cancel_button):
+        logger('Metamask is glitched, fixing', emoji='🙀')
+    waitForImage(connect_wallet_btn_img)
 
 def logger(message, telegram=False, emoji=None):
     formatted_datetime = dateFormatted()
@@ -644,14 +648,8 @@ def login():
         if (login_attempts > 3):
             sendTelegramPrint()
             logger('+3 login attempts, retrying', telegram=True, emoji='🔃')
-            # pyautogui.hotkey('ctrl', 'f5')
-            pyautogui.hotkey('ctrl', 'shift', 'r')
             login_attempts = 0
-
-            if clickButton(metamask_cancel_button):
-                logger('Metamask is glitched, fixing', emoji='🙀')
-
-            waitForImage(connect_wallet_btn_img)
+            refreshNavigation()
 
         login()
 
@@ -663,10 +661,7 @@ def handleError():
         sendTelegramPrint()
         logger('Error detected, trying to resolve', telegram=True, emoji='💥')
         clickButton(ok_btn_img)
-        logger('Refreshing page', telegram=True, emoji='🔃')
-        # pyautogui.hotkey('ctrl', 'f5')
-        pyautogui.hotkey('ctrl', 'shift', 'r')
-        waitForImage(connect_wallet_btn_img)
+        refreshNavigation()
         login()
     else:
         return False
@@ -816,7 +811,8 @@ def main():
             "login": 0,
             "heroes": 0,
             "new_map": 0,
-            "refresh_heroes": 0
+            "refresh_heroes": 0,
+            "refresh_page": 0
         })
         counterAccounts += 1
 
@@ -824,11 +820,6 @@ def main():
         curretAccount = 1
         # Display with 1280x800
         clickWindow = 120
-
-        if currentScreen() == "login":
-            login()
-
-        handleError()
 
         for last in accounts:
             
@@ -839,6 +830,15 @@ def main():
 
             now = time.time()
 
+            if now - last["refresh_page"] > refresh_page * 60:
+                last["refresh_page"] = now
+                refreshNavigation()
+
+            if currentScreen() == "login":
+                login()
+
+            handleError()
+
             if now - last["heroes"] > next_refresh_heroes * 60:
                 last["heroes"] = now
                 last["refresh_heroes"] = now
@@ -846,23 +846,29 @@ def main():
             
             sleep(1, 2)
             
-            if currentScreen() == "main":
-                if clickButton(teasureHunt_icon_img):
-                    logger('Entering treasure hunt', emoji='▶️')
+            i = 1
+            while i < 4:
+                if currentScreen() == "main":
+                    if clickButton(teasureHunt_icon_img):
+                        logger('Entering treasure hunt', emoji='▶️')
+                        last["refresh_heroes"] = now
+
+                if currentScreen() == "thunt":
+                    if clickButton(new_map_btn_img):
+                        last["new_map"] = now
+                        clickNewMap()
+
+                if currentScreen() == "character":
+                    clickButton(x_button_img)
+                    sleep(1, 3)
+
+                if now - last["refresh_heroes"] > next_refresh_heroes_positions * 60:
                     last["refresh_heroes"] = now
+                    refreshHeroesPositions()
 
-            if currentScreen() == "thunt":
-                if clickButton(new_map_btn_img):
-                    last["new_map"] = now
-                    clickNewMap()
+                i += 1
 
-            if currentScreen() == "character":
-                clickButton(x_button_img)
-                sleep(1, 3)
-
-            if now - last["refresh_heroes"] > next_refresh_heroes_positions * 60:
-                last["refresh_heroes"] = now
-                refreshHeroesPositions()
+                time.sleep(1)
 
             checkLogout()
             sys.stdout.flush()
