@@ -63,9 +63,8 @@ hc = HumanClicker()
 pyautogui.PAUSE = streamConfig['time_intervals']['interval_between_movements']
 pyautogui.FAILSAFE = False
 general_check_time = 5
-check_mult = 2
+refresh_page = 60
 
-multi_account = True
 heroes_clicked = 0
 heroes_clicked_total = 0
 login_attempts = 0
@@ -103,20 +102,14 @@ chest1 = cv2.imread('./images/targets/chest1.png')
 chest2 = cv2.imread('./images/targets/chest2.png')
 chest3 = cv2.imread('./images/targets/chest3.png')
 chest4 = cv2.imread('./images/targets/chest4.png')
-brave_crash = cv2.imread('./images/targets/brave_crash.png')
-brave_navigator = cv2.imread('./images/targets/brave_navigator.png')
-
-
-def braveCrashCheck():
-    if positions(brave_crash):
-        logger('Brave failed, Refresh navigation', emoji='🤖')
-        pyautogui.hotkey('ctrl', 'shift', 'r')
-
 
 def refreshNavigation():
     logger('Refresh navigation', emoji='🤖')
     pyautogui.hotkey('ctrl', 'shift', 'r')
-
+    time.sleep(5)
+    if clickButton(metamask_cancel_button):
+        logger('Metamask is glitched, fixing', emoji='🙀')
+    waitForImage(connect_wallet_btn_img)
 
 def logger(message, telegram=False, emoji=None):
     formatted_datetime = dateFormatted()
@@ -659,14 +652,8 @@ def login():
         if (login_attempts > 3):
             sendTelegramPrint()
             logger('+3 login attempts, retrying', telegram=True, emoji='🔃')
-            # pyautogui.hotkey('ctrl', 'f5')
-            pyautogui.hotkey('ctrl', 'shift', 'r')
             login_attempts = 0
-
-            if clickButton(metamask_cancel_button):
-                logger('Metamask is glitched, fixing', emoji='🙀')
-
-            waitForImage(connect_wallet_btn_img)
+            refreshNavigation()
 
         login()
 
@@ -678,10 +665,7 @@ def handleError():
         sendTelegramPrint()
         logger('Error detected, trying to resolve', telegram=True, emoji='💥')
         clickButton(ok_btn_img)
-        logger('Refreshing page', telegram=True, emoji='🔃')
-        # pyautogui.hotkey('ctrl', 'f5')
-        pyautogui.hotkey('ctrl', 'shift', 'r')
-        waitForImage(connect_wallet_btn_img)
+        refreshNavigation()
         login()
     else:
         return False
@@ -818,11 +802,15 @@ def main():
             "heroes": 0,
             "new_map": 0,
             "refresh_heroes": 0,
-            "check_mult": 0
+            "refresh_page": 0
         }
 
     while True:
         now = time.time()
+
+        if now - last["refresh_page"] > refresh_page * 60:
+                last["refresh_page"] = now
+                refreshNavigation()
 
         if currentScreen() == "login":
             login()
