@@ -104,6 +104,7 @@ chest3 = cv2.imread('./images/targets/chest3.png')
 chest4 = cv2.imread('./images/targets/chest4.png')
 
 def refreshNavigation():
+    refreshHeroesPositions()
     logger('Refresh navigation', emoji='🤖')
     pyautogui.hotkey('ctrl', 'shift', 'r')
     time.sleep(5)
