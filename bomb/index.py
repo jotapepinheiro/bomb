@@ -819,8 +819,6 @@ def main():
 
         handleError()
 
-        sleep(4, 5)
-
         if now - last["heroes"] > next_refresh_heroes * 60:
             last["heroes"] = now
             last["refresh_heroes"] = now

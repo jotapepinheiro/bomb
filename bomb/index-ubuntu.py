@@ -839,9 +839,7 @@ def main():
             if currentScreen() == "login":
                 login()
 
-            handleError()
-
-            sleep(4, 5)
+            handleError()        
 
             if now - last["heroes"] > next_refresh_heroes * 60:
                 last["heroes"] = now
