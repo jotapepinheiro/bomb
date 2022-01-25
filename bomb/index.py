@@ -10,20 +10,6 @@ import sys
 
 init()
 
-banner = """
-*******************************************************************************
-** BOMBCRYPTO - BOT
-**
-** Please consider buying me a coffee :)
-** BCOIN: 0x4847C29561B6682154E25c334E12d156e19F613a
-** PIX: 08912d17-47a6-411e-b7ec-ef793203f836
-*******************************************************************************
-** Press CTRL + C to kill the bot.
-** Some configs can be found in the https://github.com/newerton/bombcrypto-bot
-*******************************************************************************"""
-
-print(Fore.GREEN + banner + Style.RESET_ALL)
-
 application = Application()
 log = Log()
 multi_account = MultiAccount()
@@ -49,7 +35,6 @@ if __name__ == '__main__':
         else:
             main()
     except KeyboardInterrupt:
-        log.console('Shutting down the bot',
-                    services=True, emoji='😓', color='red')
+        log.console('Shutting down the bot', services=True, emoji='😓', color='red')
         telegram.stop()
         exit()

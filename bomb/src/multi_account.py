@@ -59,8 +59,7 @@ class MultiAccount:
             "login": 0,
             "heroes": 0,
             "new_map": 0,
-            "refresh_heroes": 0,
-            "check_updates": 0
+            "refresh_heroes": 0
         }
 
         while True:
@@ -86,8 +85,7 @@ class MultiAccount:
                 "login": 0,
                 "heroes": 0,
                 "new_map": 0,
-                "refresh_heroes": 0,
-                "check_updates": 0
+                "refresh_heroes": 0
             })
             counterAccounts += 1
 
@@ -145,10 +143,6 @@ class MultiAccount:
               self.heroes.refreshHeroesPositions()
 
           i += 1
-
-        if now - last["check_updates"] > self.check_for_updates * 60:
-            last["check_updates"] = now
-            self.application.checkUpdate()
 
         self.auth.checkLogout()
         sys.stdout.flush()
