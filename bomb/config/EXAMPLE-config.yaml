@@ -1,6 +1,5 @@
 app:
   theme: 'lunar_newyear'
-  verify_version: true
   emoji: false
   terminal_colorful: false
   run_time_app: 1
