@@ -92,7 +92,7 @@ git version
 Install the dependencies by running the command below into the project folder:
 
 ```
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 Ready! Now just start the bot with the command, inside the project folder
 

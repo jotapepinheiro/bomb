@@ -1,4 +1,5 @@
 import pyautogui
+import time
 class Application:
     def __init__(self):
         from src.config import Config
@@ -12,10 +13,13 @@ class Application:
         self.log = Log()
 
     def start(self):
+        self.importLibs()
+
         pyautogui.FAILSAFE = False
 
         input('Press Enter to start the bot...\n')
         self.log.console('Starting bot...', services=True, emoji='🤖', color='green')
+        time.sleep(3)
 
     def stop(self):
         self.telegram.stop()

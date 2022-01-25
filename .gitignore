@@ -7,3 +7,5 @@
 /bomb/logs/map-report.jpg
 date.cpython-39.pyc
 /bomb/config/services/telegram.yaml
+/bomb/src/services/__pycache__
+/bomb/src/__pycache__

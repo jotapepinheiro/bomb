@@ -41,8 +41,7 @@ class Auth:
             self.recognition.waitForImage(
                 (metamask_sign_button, metamask_unlock_button), multiple=True)
 
-        metamask_unlock_coord = self.recognition.positions(
-            metamask_unlock_button)
+        metamask_unlock_coord = self.recognition.positions(metamask_unlock_button)
         if metamask_unlock_coord is not False:
             if(metamaskData["enable_login_metamask"] is False):
                 self.log.console('Metamask locked! But login with password is disabled, exiting', emoji='🔒', color='red')
@@ -60,7 +59,7 @@ class Auth:
             self.actions.sleep(5, 7, forceTime=True)
             if self.actions.clickButton(metamask_sign_button):
                 self.log.console('Found glitched sign button. Waiting to check if logged in', emoji='✔️', color='yellow')
-            self.recognition.waitForImage(treasure_hunt_banner, timeout=30)
+            self.recognition.waitForImage(treasure_hunt_banner, timeout=60)
             self.errors.verify()
 
         if self.recognition.currentScreen() == "main":

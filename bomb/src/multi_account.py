@@ -38,6 +38,7 @@ class MultiAccount:
 
     def start(self):
         self.importLibs()
+
         multiAccount = self.config['app']['multi_account']['enable']
         if multiAccount != True:
             self.log.console('Multi account disabled', emoji='🧾', color='cyan')
@@ -90,10 +91,11 @@ class MultiAccount:
             counterAccounts += 1
 
         while True:
+            curretAccount = 1
+            # Display with 1280x800
+            clickWindow = 120
+
             for last in accounts:
-                curretAccount = 1
-                # Display with 1280x800
-                clickWindow = 120
 
                 self.activeWindow(last, curretAccount, clickWindow)
 
@@ -114,10 +116,6 @@ class MultiAccount:
         self.errors.verify()
 
         now = time.time()
-
-        if now - last["refresh_page"] > self.refresh_page * 60:
-            last["refresh_page"] = now
-            self.heroes.refreshNavigation()
 
         if now - last["heroes"] > self.next_refresh_heroes * 60:
             last["heroes"] = now
@@ -179,6 +177,6 @@ class MultiAccount:
         humanClicker.click()
         self.actions.sleep(1, 1, forceTime=True)
         self.actions.clickButton(close_button)
-        self.log.console('Browser Active: ' + curretAccount, emoji='🪟', color='cyan')
+        self.log.console('Browser Active: ' + str(curretAccount), emoji='🪟', color='cyan')
         self.actions.sleep(1, 1, forceTime=True)
         self.steps(last)

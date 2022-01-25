@@ -53,6 +53,7 @@ class Actions:
             self.move((int(random.uniform(x, x+w)),
                       int(random.uniform(y, y+h))), 1)
             humanClicker.click()
+            time.sleep(1)
             return True
 
     def clickGoWork(self):

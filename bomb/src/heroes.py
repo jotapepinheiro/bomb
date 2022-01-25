@@ -110,12 +110,12 @@ class Heroes:
         if currentScreen == "treasure_hunt":
             if self.actions.clickButton(back_button):
                 self.actions.sleep(1, 1)
-                if self.actions.clickButton(menu_heroe_icon):
+                if self.actions.clickButton(menu_heroe_icon, threshold=0.6):
                     self.actions.sleep(1, 1)
                     # checkCaptcha()
                     self.recognition.waitForImage(home_button)
         if currentScreen == "main":
-            if self.actions.clickButton(menu_heroe_icon):
+            if self.actions.clickButton(menu_heroe_icon, threshold=0.6):
                 self.actions.sleep(1, 1)
                 # checkCaptcha()
                 self.recognition.waitForImage(home_button)
