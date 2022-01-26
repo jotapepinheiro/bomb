@@ -567,11 +567,11 @@ def goToHeroes():
     if currentScreen() == "thunt":
         if clickButton(arrow_img):
             sleep(1, 3)
-            if clickButton(hero_img):
+            if clickButton(hero_img, threshold=0.6):
                 sleep(1, 3)
                 waitForImage(home_img)
     if currentScreen() == "main":
-        if clickButton(hero_img):
+        if clickButton(hero_img, threshold=0.6):
             sleep(1, 3)
             waitForImage(home_img)
     if currentScreen() == "unknown" or currentScreen() == "login":
