@@ -44,10 +44,8 @@ class TreasureHunt:
         back_button_image = self.images.image('back_button')
         fullscreen_button_image = self.images.image('full_screen_button')
         self.actions.sleep(1, 1)
-        back_button = self.recognition.positions(
-            back_button_image, returnArray=True)
-        fullscreen_button = self.recognition.positions(
-            fullscreen_button_image, returnArray=True)
+        back_button = self.recognition.positions(back_button_image, returnArray=True)
+        fullscreen_button = self.recognition.positions(fullscreen_button_image, returnArray=True)
 
         if len(back_button) <= 0 or len(fullscreen_button) <= 0:
             return

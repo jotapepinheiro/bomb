@@ -46,8 +46,7 @@ class Bcoins:
             screenshot = self.desktop.printScreen()
             cropped = screenshot[y: y + h, x: x + w]
             cv2.imwrite(self.BCOIN_BOX_IMAGE, cropped)
-            self.log.console('Your Chest image created',
-                             services=False, emoji='🪟')
+            self.log.console('Your Chest image created', services=False, emoji='🪟')
 
         self.actions.clickButton(close_button)
         return True

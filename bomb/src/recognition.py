@@ -44,8 +44,7 @@ class Recognition:
         if self.config['log']['debug'] is not False and debug == True:
             img2 = img.copy()
             for r in rectangles:
-                cv2.rectangle(img2, (r[0], r[1]),
-                              (r[0]+w, r[1]+h), (0, 0, 255), 2)
+                cv2.rectangle(img2, (r[0], r[1]), (r[0]+w, r[1]+h), (0, 0, 255), 2)
             cv2.imshow("detected", img2)
             cv2.waitKey(0)
 
