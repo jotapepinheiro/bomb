@@ -832,9 +832,9 @@ def main():
 
             now = time.time()
 
-            if now - last["refresh_page"] > refresh_page * 60:
-                last["refresh_page"] = now
-                refreshNavigation()
+            # if now - last["refresh_page"] > refresh_page * 60:
+            #     last["refresh_page"] = now
+            #     refreshNavigation()
 
             if currentScreen() == "login":
                 login()
