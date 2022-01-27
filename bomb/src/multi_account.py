@@ -110,8 +110,6 @@ class MultiAccount:
         close_button = self.images.image('close_button')
         run_time_app = self.config['app']['run_time_app']
 
-        currentScreen = self.recognition.currentScreen()
-
         now = time.time()
 
         if now - last["refresh_page"] > self.refresh_page * 60:
@@ -119,6 +117,8 @@ class MultiAccount:
             self.heroes.refreshHeroesPositions()
             time.sleep(5)
             self.actions.refreshPage()
+
+        currentScreen = self.recognition.currentScreen()
 
         if currentScreen == "login":
             self.auth.login()
@@ -129,6 +129,8 @@ class MultiAccount:
             last["heroes"] = now
             last["refresh_heroes"] = now
             self.heroes.getMoreHeroes()
+
+        self.actions.sleep(2, 2, forceTime=True)
 
         i = 1
         while i < 4:
@@ -149,6 +151,7 @@ class MultiAccount:
               self.heroes.refreshHeroesPositions()
 
           i += 1
+          time.sleep(1)
 
         self.auth.checkLogout()
         sys.stdout.flush()

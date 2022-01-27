@@ -123,8 +123,8 @@ class Heroes:
             self.auth.checkLogout()
 
     def refreshHeroesPositions(self):
-        self.log.console('Refreshing heroes positions',
-                         emoji='🔃', color='yellow')
+        self.importLibs()
+        self.log.console('Refreshing heroes positions', emoji='🔃', color='yellow')
 
         global next_refresh_heroes_positions
 
