@@ -117,6 +117,7 @@ class MultiAccount:
         if now - last["refresh_page"] > self.refresh_page * 60:
             last["refresh_page"] = now
             self.heroes.refreshHeroesPositions()
+            time.sleep(5)
             self.actions.refreshPage()
 
         if currentScreen == "login":
