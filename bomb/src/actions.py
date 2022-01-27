@@ -125,6 +125,7 @@ class Actions:
         self.importLibs()
         self.log.console('Refreshing page', services=True, emoji='🔃', color='green')
         pyautogui.hotkey('ctrl', 'shift', 'r')
+        time.sleep(5)
 
     def show(self, img):
         cv2.imshow('img', img)

@@ -10,7 +10,7 @@ class MultiAccount:
         from src.config import Config
         self.config = Config().read()
 
-        self.check_for_updates = 60
+        self.refresh_page = 45
         self.next_refresh_heroes = self.config['time_intervals']['send_heroes_for_work'][0]
         self.next_refresh_heroes_positions = self.config['time_intervals']['refresh_heroes_positions'][0]
 
@@ -60,7 +60,8 @@ class MultiAccount:
             "login": 0,
             "heroes": 0,
             "new_map": 0,
-            "refresh_heroes": 0
+            "refresh_heroes": 0,
+            "refresh_page": 0
         }
 
         while True:
@@ -86,7 +87,8 @@ class MultiAccount:
                 "login": 0,
                 "heroes": 0,
                 "new_map": 0,
-                "refresh_heroes": 0
+                "refresh_heroes": 0,
+                "refresh_page": 0
             })
             counterAccounts += 1
 
@@ -110,12 +112,17 @@ class MultiAccount:
 
         currentScreen = self.recognition.currentScreen()
 
+        now = time.time()
+
+        if now - last["refresh_page"] > self.refresh_page * 60:
+            last["refresh_page"] = now
+            self.heroes.refreshHeroesPositions()
+            self.actions.refreshPage()
+
         if currentScreen == "login":
             self.auth.login()
 
         self.errors.verify()
-
-        now = time.time()
 
         if now - last["heroes"] > self.next_refresh_heroes * 60:
             last["heroes"] = now
