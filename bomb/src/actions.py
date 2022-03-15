@@ -29,6 +29,10 @@ class Actions:
         self.treasure_hunt = TreasureHunt()
         self.telegram = Telegram()
 
+    def click(self):
+      humanClicker.click()
+      return True
+
     def clickButton(self, image, name=None, timeout=3, threshold=None):
         self.importLibs()
         if(threshold == None):
@@ -50,9 +54,9 @@ class Actions:
                 continue
 
             x, y, w, h = matches[0]
-            self.move((int(random.uniform(x, x+w)), int(random.uniform(y, y+h))), 1)
+            self.move((int(random.uniform(x, x+w)),
+                      int(random.uniform(y, y+h))), 1)
             humanClicker.click()
-            time.sleep(1)
             return True
 
     def clickGoWork(self):
@@ -79,7 +83,7 @@ class Actions:
             movementInSeconds = 0.5
         humanClicker.move(coords, movementInSeconds)
 
-    def moveTo(self, coords, movementInSeconds, forceTime):
+    def moveTo(self, coords, movementInSeconds, forceTime=False):
         self.importLibs()
         speed = self.config['app']['speed']
         if speed == 'fast' and forceTime == False:
@@ -108,7 +112,7 @@ class Actions:
             sleep = 0
         return time.sleep(sleep)
 
-    def clickNewMap(self):
+    def clickNewMap(self, curretAccount):
         self.log.console('New map', emoji='🗺️', color='magenta')
         self.actions.sleep(2, 2, forceTime=True)
         # checkCaptcha()
@@ -119,13 +123,12 @@ class Actions:
 
         self.bcoins.openYourChestWindow()
         self.telegram.sendBCoinReport(callTreasureHuntMethods=False)
-        self.bcoins.getBcoins()
+        self.bcoins.getBcoins(curretAccount)
 
     def refreshPage(self):
         self.importLibs()
         self.log.console('Refreshing page', services=True, emoji='🔃', color='green')
         pyautogui.hotkey('ctrl', 'shift', 'r')
-        time.sleep(5)
 
     def show(self, img):
         cv2.imshow('img', img)

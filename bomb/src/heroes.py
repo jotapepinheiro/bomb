@@ -50,15 +50,31 @@ class Heroes:
             mode = heroesMode
 
         if mode == 'all' or mode == 'workall':
-            self.log.console('Sending all heroes to work!', services=True, emoji='⚒️', color='green')
+            self.log.console('Sending all heroes to work!',
+                             services=True, emoji='⚒️', color='green')
         elif mode == 'full':
-            self.log.console('Sending heroes with full stamina bar to work!', services=True, emoji='⚒️', color='green')
+            self.log.console(
+                'Sending heroes with full stamina bar to work!',
+                services=True,
+                emoji='⚒️',
+                color='green')
         elif mode == 'green':
-            self.log.console('Sending heroes with green stamina bar to work!', services=True, emoji='⚒️', color='green')
+            self.log.console(
+                'Sending heroes with green stamina bar to work!',
+                services=True,
+                emoji='⚒️',
+                color='green')
         elif mode == 'restall':
-            self.log.console('Put the heroes to rest', services=True, emoji='💤', color='green')
+            self.log.console(
+                'Put the heroes to rest',
+                services=True,
+                emoji='💤',
+                color='green')
         else:
-            self.log.console('Sending all heroes to work!', services=True, emoji='⚒️', color='green')
+            self.log.console('Sending all heroes to work!',
+                             services=True,
+                             emoji='⚒️',
+                             color='green')
 
         if mode == 'all' or mode == 'workall':
             self.clickSendAllButton()
@@ -110,12 +126,12 @@ class Heroes:
         if currentScreen == "treasure_hunt":
             if self.actions.clickButton(back_button):
                 self.actions.sleep(1, 1)
-                if self.actions.clickButton(menu_heroe_icon, threshold=0.6):
+                if self.actions.clickButton(menu_heroe_icon):
                     self.actions.sleep(1, 1)
                     # checkCaptcha()
                     self.recognition.waitForImage(home_button)
         if currentScreen == "main":
-            if self.actions.clickButton(menu_heroe_icon, threshold=0.6):
+            if self.actions.clickButton(menu_heroe_icon):
                 self.actions.sleep(1, 1)
                 # checkCaptcha()
                 self.recognition.waitForImage(home_button)
@@ -123,8 +139,8 @@ class Heroes:
             self.auth.checkLogout()
 
     def refreshHeroesPositions(self):
-        self.importLibs()
-        self.log.console('Refreshing heroes positions', emoji='🔃', color='yellow')
+        self.log.console('Refreshing heroes positions',
+                         emoji='🔃', color='yellow')
 
         global next_refresh_heroes_positions
 

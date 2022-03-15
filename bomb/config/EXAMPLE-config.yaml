@@ -1,11 +1,13 @@
 app:
-  theme: 'lunar_newyear'
+  theme: "default"
   emoji: false
   terminal_colorful: true
   run_time_app: 1
   monitor_to_use: 1
   captcha: false
-  speed: 'normal'
+  speed: "fast"
+  authenticate: false
+  max_accounts: 1
   multi_account:
     enable: true
     total_accounts: 4
@@ -32,22 +34,23 @@ threshold:
   heroes_rest_all: 0.9
   chest: 0.65
   jail: 0.8
+  auth_input: 0.9
 
 heroes:
-  mode: 'green'
+  mode: "green"
   list:
-    scroll_attempts: 4
+    scroll_attempts: 3
 
 offsets:
   work_button_green: [120, 140] # [min value, max value]
   work_button_full: [90, 110] # [min value, max value]
 
 metamask:
-  enable_login_metamask: false
-  password: 'METAMASK PASSWORD'
+  enable: false
+  password: ""
 
 services:
-  telegram: true
+  telegram: false
 
 log:
   save_to_file: false

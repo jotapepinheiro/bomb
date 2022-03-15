@@ -10,11 +10,15 @@ Commands = [
     BotCommand("chat_id", "Send chat id"),
     BotCommand("print", "Send printscreen"),
     BotCommand("map", "Send a printscreen of the map (disabled in multi account)"),
-    BotCommand("bcoin", "Send a printscreen of your BCOIN (disabled in multi account temporarily)"),
-    BotCommand("workall", "Send all heroes to work (disabled in multi account temporarily)"),
-    BotCommand("restall", "Send all heroes to rest (disabled in multi account temporarily)"),
+    BotCommand(
+        "bcoin", "Send a printscreen of your BCOIN (disabled in multi account temporarily)"),
+    BotCommand(
+        "workall", "Send all heroes to work (disabled in multi account temporarily)"),
+    BotCommand(
+        "restall", "Send all heroes to rest (disabled in multi account temporarily)"),
     BotCommand("donation", "Some wallets for donation")
 ]
+
 
 class Telegram:
     def __init__(self):
@@ -27,7 +31,8 @@ class Telegram:
             self.telegramConfig = self.telegramConfig()
             try:
                 self.updater = Updater(self.telegramConfig['botfather_token'])
-                self.TelegramBot = telegram.Bot(token=self.telegramConfig['botfather_token'])
+                self.TelegramBot = telegram.Bot(
+                    token=self.telegramConfig['botfather_token'])
             except telegram.error.InvalidToken:
                 self.updater = None
                 if self.enableTelegram == True:
@@ -57,7 +62,8 @@ class Telegram:
 
     def telegramConfig(self):
         try:
-            file = open("./config/services/telegram.yaml", 'r', encoding='utf8')
+            file = open("./config/services/telegram.yaml",
+                        'r', encoding='utf8')
         except FileNotFoundError:
             print('Info: Telegram not configure, rename EXAMPLE-telegram.yaml to telegram.yaml in /config/services/ folder')
             exit()
@@ -78,26 +84,36 @@ class Telegram:
         self.bot = Bot(botFatherToken)
         self.bot.set_my_commands(Commands, language_code='en')
 
+        def userHasPermission(self, update: Update):
+            return True if f'{update.message.from_user.id}' in self.telegramConfig['chat_ids'] else False
+
         def sendPrint(update: Update, context: CallbackContext) -> None:
-            self.commandSendPrint(update)
+            if userHasPermission(self, update):
+                self.commandSendPrint(update)
 
         def sendChatId(update: Update, context: CallbackContext) -> None:
-            self.commandSendChatId(update)
+            if userHasPermission(self, update):
+                self.commandSendChatId(update)
 
         def sendMap(update: Update, context: CallbackContext) -> None:
-            self.commandSendMap(update)
+            if userHasPermission(self, update):
+                self.commandSendMap(update)
 
         def sendBcoin(update: Update, context: CallbackContext) -> None:
-            self.commandSendBcoin(update)
+            if userHasPermission(self, update):
+                self.commandSendBcoin(update)
 
         def sendDonation(update: Update, context: CallbackContext) -> None:
-            self.commandSendDonation(update)
+            if userHasPermission(self, update):
+                self.commandSendDonation(update)
 
         def sendAllHeroesToWork(update: Update, context: CallbackContext) -> None:
-            self.commandAllHeroesToWork(update)
+            if userHasPermission(self, update):
+                self.commandAllHeroesToWork(update)
 
         def sendAllHeroesToRest(update: Update, context: CallbackContext) -> None:
-            self.commandAllHeroesToRest(update)
+            if userHasPermission(self, update):
+                self.commandAllHeroesToRest(update)
 
         commands = [
             ['chat_id', sendChatId],
@@ -110,11 +126,13 @@ class Telegram:
         ]
 
         for command in commands:
-            self.updater.dispatcher.add_handler(CommandHandler(command[0], command[1]))
+            self.updater.dispatcher.add_handler(
+                CommandHandler(command[0], command[1]))
         try:
             self.updater.start_polling()
         except:
-            self.log.console('Bot not initialized, see configuration file', emoji='🤖')
+            self.log.console(
+                'Bot not initialized, see configuration file', emoji='🤖')
 
     def stop(self):
         if self.updater:
@@ -134,11 +152,13 @@ class Telegram:
         try:
             image = self.treasure_hunt.MAP_IMAGE
             for chat_id in self.telegramConfig['chat_ids']:
-                self.TelegramBot.send_photo(chat_id=chat_id, photo=open(image, 'rb'))
+                self.TelegramBot.send_photo(
+                    chat_id=chat_id, photo=open(image, 'rb'))
         except:
             self.log.console('Telegram offline', emoji='😿')
 
-        self.log.console('Map image sent to Telegram', services=False, emoji='📄')
+        self.log.console('Map image sent to Telegram',
+                         services=False, emoji='📄')
         return True
 
     def sendBCoinReport(self, callTreasureHuntMethods=True):
@@ -154,11 +174,13 @@ class Telegram:
         try:
             image = self.bcoins.BCOIN_BOX_IMAGE
             for chat_id in self.telegramConfig['chat_ids']:
-                self.TelegramBot.send_photo(chat_id=chat_id, photo=open(image, 'rb'))
+                self.TelegramBot.send_photo(
+                    chat_id=chat_id, photo=open(image, 'rb'))
         except:
             self.log.console('Telegram offline', emoji='😿')
 
-        self.log.console('BCoin image sent to Telegram', services=False, emoji='📄')
+        self.log.console('BCoin image sent to Telegram',
+                         services=False, emoji='📄')
         return True
 
     def sendMessage(self, message):
@@ -169,9 +191,11 @@ class Telegram:
         try:
             if(len(self.telegramConfig['chat_ids']) > 0):
                 for chat_id in self.telegramConfig['chat_ids']:
-                    self.TelegramBot.send_message(text=message, chat_id=chat_id)
+                    self.TelegramBot.send_message(
+                        text=message, chat_id=chat_id)
         except:
-            self.log.console('Error to send telegram message. See configuration file', emoji='📄')
+            self.log.console(
+                'Error to send telegram message. See configuration file', emoji='📄')
             return
 
     def sendPrint(self):
@@ -184,9 +208,11 @@ class Telegram:
                 screenshot = self.desktop.printScreen()
                 cv2.imwrite(image, screenshot)
                 for chat_id in self.telegramConfig['chat_ids']:
-                    self.TelegramBot.send_photo(chat_id=chat_id, photo=open(image, 'rb'))
+                    self.TelegramBot.send_photo(
+                        chat_id=chat_id, photo=open(image, 'rb'))
         except:
-            self.log.console('Error to send telegram print. See configuration file', emoji='📄')
+            self.log.console(
+                'Error to send telegram print. See configuration file', emoji='📄')
 
     def commandSendPrint(self, update):
         self.importLibs()
@@ -195,32 +221,51 @@ class Telegram:
         try:
             update.message.reply_text('🔃 Proccessing printscreen...')
             screenshot = self.desktop.printScreen()
-            image = './logs/print-report.{}'.format(self.telegramConfig['format_of_image'])
+            image = './logs/print-report.{}'.format(
+                self.telegramConfig['format_of_image'])
             cv2.imwrite(image, screenshot)
             update.message.reply_photo(photo=open(image, 'rb'))
         except:
-            self.log.console('Error to send telegram print', emoji='📄')
+            self.log.console(
+                'Error to send telegram print', emoji='📄')
 
     def commandSendChatId(self, update):
         update.message.reply_text(f'🆔 Your id is: {update.effective_user.id}')
 
     def commandSendMap(self, update):
         update.message.reply_text('🔃 Proccessing image map...')
-        if self.sendMapReport() is None:
-            update.message.reply_text('😿 An error has occurred')
-
+        if self.config['app']['multi_account']['enable'] is not True:
+            if self.sendMapReport() is None:
+                update.message.reply_text('😿 An error has occurred')
+        else:
+            update.message.reply_text(
+                '⚠️ Command disabled, because of the Multi Accounts is enabled.')
 
     def commandSendBcoin(self, update):
         update.message.reply_text('🔃 Proccessing image bcoin...')
-        if self.sendBCoinReport() is None:
-            update.message.reply_text('😿 An error has occurred')
+        if self.config['app']['multi_account']['enable'] is not True:
+            if self.sendBCoinReport() is None:
+                update.message.reply_text('😿 An error has occurred')
+        else:
+            update.message.reply_text(
+                '⚠️ Command disabled, because of the Multi Accounts is enabled.')
 
     def commandAllHeroesToWork(self, update):
-        self.heroes.getMoreHeroes('workall')
+        if self.config['app']['multi_account']['enable'] is not True:
+            self.heroes.getMoreHeroes('workall')
+        else:
+            update.message.reply_text(
+                '⚠️ Command disabled, because of the Multi Accounts is enabled.')
 
     def commandAllHeroesToRest(self, update):
-        self.heroes.getMoreHeroes('restall')
+        if self.config['app']['multi_account']['enable'] is not True:
+            self.heroes.getMoreHeroes('restall')
+        else:
+            update.message.reply_text(
+                '⚠️ Command disabled, because of the Multi Accounts is enabled.')
 
     def commandSendDonation(self, update):
-        update.message.reply_text('🎁 Smart Chain Wallet: \n\n 0x4847C29561B6682154E25c334E12d156e19F613a \n\n Thank You! 😀')
-        update.message.reply_text('🎁 Chave PIX: \n\n 08912d17-47a6-411e-b7ec-ef793203f836 \n\n Muito obrigado! 😀')
+        update.message.reply_text(
+            '🎁 Smart Chain Wallet: \n\n 0x4847C29561B6682154E25c334E12d156e19F613a \n\n Thank You! 😀')
+        update.message.reply_text(
+            '🎁 Chave PIX: \n\n 08912d17-47a6-411e-b7ec-ef793203f836 \n\n Muito obrigado! 😀')

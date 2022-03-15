@@ -1,28 +1,29 @@
-from pyclick import HumanClicker
-
 import sys
 import time
+
+from pyclick import HumanClicker
 
 humanClicker = HumanClicker()
 
 class MultiAccount:
     def __init__(self):
         from src.config import Config
+        from src.log import Log
         self.config = Config().read()
+        self.log = Log()
 
-        self.refresh_page = 45
+        self.check_for_updates = 60
         self.next_refresh_heroes = self.config['time_intervals']['send_heroes_for_work'][0]
         self.next_refresh_heroes_positions = self.config['time_intervals']['refresh_heroes_positions'][0]
 
     def importLibs(self):
         from src.actions import Actions
         from src.application import Application
-        from src.auth import Auth
+        from src.auth import Auth, account_active
         from src.captcha import Captcha
         from src.error import Errors
         from src.heroes import Heroes
         from src.images import Images
-        from src.log import Log
         from src.recognition import Recognition
         from src.treasure_hunt import TreasureHunt
         self.actions = Actions()
@@ -32,13 +33,13 @@ class MultiAccount:
         self.errors = Errors()
         self.heroes = Heroes()
         self.images = Images()
-        self.log = Log()
         self.recognition = Recognition()
         self.treasure_hunt = TreasureHunt()
 
+        self.account_active = account_active
+
     def start(self):
         self.importLibs()
-
         multiAccount = self.config['app']['multi_account']['enable']
         if multiAccount != True:
             self.log.console('Multi account disabled', emoji='🧾', color='cyan')
@@ -46,22 +47,22 @@ class MultiAccount:
 
         if multiAccount == True:
             self.log.console('Multi account enabled', emoji='🧾', color='cyan')
-            self.botMultiAccountWindows()
+            self.botMultiAccount()
 
     def startOnlyMapAction(self):
         self.importLibs()
         self.log.console('Multi account disabled', emoji='🧾', color='cyan')
         self.botSingleOnlyMap()
 
-
     def botSingle(self):
 
         last = {
+            "account": 1,
             "login": 0,
             "heroes": 0,
             "new_map": 0,
             "refresh_heroes": 0,
-            "refresh_page": 0
+            "check_updates": 0
         }
 
         while True:
@@ -76,8 +77,7 @@ class MultiAccount:
         while True:
             self.stepsOnlyMap(last)
 
-    def botMultiAccountWindows(self):
-
+    def botMultiAccount(self):
         # Define total accounts
         totalAccounts = self.config['app']['multi_account']['total_accounts']
         accounts = []
@@ -87,8 +87,7 @@ class MultiAccount:
                 "login": 0,
                 "heroes": 0,
                 "new_map": 0,
-                "refresh_heroes": 0,
-                "refresh_page": 0
+                "refresh_heroes": 0
             })
             counterAccounts += 1
 
@@ -104,33 +103,23 @@ class MultiAccount:
                 clickWindow += 180
                 curretAccount += 1
 
-
-    def steps(self, last):
+    def steps(self, last, curretAccount):
         new_map_button = self.images.image('new_map_button')
-        close_button = self.images.image('close_button')
         run_time_app = self.config['app']['run_time_app']
-
-        now = time.time()
-
-        if now - last["refresh_page"] > self.refresh_page * 60:
-            last["refresh_page"] = now
-            self.heroes.refreshHeroesPositions()
-            time.sleep(5)
-            self.actions.refreshPage()
 
         currentScreen = self.recognition.currentScreen()
 
         if currentScreen == "login":
-            self.auth.login()
+            self.auth.login(last['account'])
 
         self.errors.verify()
+
+        now = time.time()
 
         if now - last["heroes"] > self.next_refresh_heroes * 60:
             last["heroes"] = now
             last["refresh_heroes"] = now
             self.heroes.getMoreHeroes()
-
-        self.actions.sleep(2, 2, forceTime=True)
 
         i = 1
         while i < 4:
@@ -140,11 +129,7 @@ class MultiAccount:
           if currentScreen == "treasure_hunt":
               if self.actions.clickButton(new_map_button):
                   last["new_map"] = now
-                  self.actions.clickNewMap()
-
-          if currentScreen == "character":
-              self.actions.clickButton(close_button)
-              self.actions.sleep(1, 3, forceTime=True)
+                  self.actions.clickNewMap(curretAccount)
 
           if now - last["refresh_heroes"] > self.next_refresh_heroes_positions * 60:
               last["refresh_heroes"] = now
@@ -156,7 +141,6 @@ class MultiAccount:
         self.auth.checkLogout()
         sys.stdout.flush()
         self.actions.sleep(run_time_app, run_time_app, randomMouseMovement=False)
-        self.application.checkThreshold()
 
     def stepsOnlyMap(self, last):
         new_map_button = self.images.image('new_map_button')
@@ -175,8 +159,6 @@ class MultiAccount:
 
         sys.stdout.flush()
         self.actions.sleep(run_time_app, run_time_app, randomMouseMovement=False)
-        self.application.checkThreshold()
-
 
     def activeWindow(self, last, curretAccount, clickWindow):
         close_button = self.images.image('close_button')
@@ -190,4 +172,36 @@ class MultiAccount:
         self.actions.clickButton(close_button)
         self.log.console('Browser Active: ' + str(curretAccount), emoji='🪟', color='cyan')
         self.actions.sleep(1, 1, forceTime=True)
-        self.steps(last)
+        self.steps(last, curretAccount)
+
+    def unicodeToAscii(self, text):
+        return (
+            str(text)
+            .replace('\\xc3\\xa9', 'e')
+            .replace('\\xc2\\xb7', '·')
+            .replace('\\xe2\\x80\\x99', "'")
+            .replace('\\xe2\\x80\\x9c', '"')
+            .replace('\\xe2\\x80\\x9d', '"')
+            .replace('\\xe2\\x80\\x9e', '"')
+            .replace('\\xe2\\x80\\x9f', '"')
+            .replace('\\xe2\\x80\\x9c', '"')
+            .replace('\\xe2\\x80\\x93', '-')
+            .replace('\\xe2\\x80\\x92', '-')
+            .replace('\\xe2\\x80\\x94', '-')
+            .replace('\\xe2\\x80\\x94', '-')
+            .replace('\\xe2\\x80\\x98', "'")
+            .replace('\\xe2\\x80\\x9b', "'")
+            .replace('\\xe2\\x80\\x90', '-')
+            .replace('\\xe2\\x80\\x91', '-')
+            .replace('\\xe2\\x80\\xb2', "'")
+            .replace('\\xe2\\x80\\xb3', "'")
+            .replace('\\xe2\\x80\\xb4', "'")
+            .replace('\\xe2\\x80\\xb5', "'")
+            .replace('\\xe2\\x80\\xb6', "'")
+            .replace('\\xe2\\x80\\xb7', "'")
+            .replace('\\xe2\\x81\\xba', " ")
+            .replace('\\xe2\\x81\\xbb', "-")
+            .replace('\\xe2\\x81\\xbc', "=")
+            .replace('\\xe2\\x81\\xbd', "(")
+            .replace('\\xe2\\x81\\xbe', ")")
+        )

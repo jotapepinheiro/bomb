@@ -1,12 +1,11 @@
-from colorama import init, Fore, Style
+import sys
+
+from colorama import Fore, Style, init
 
 from src.application import Application
 from src.log import Log
 from src.multi_account import MultiAccount
-
 from src.services.telegram import Telegram
-
-import sys
 
 init()
 
